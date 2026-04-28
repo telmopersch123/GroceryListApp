@@ -3,15 +3,20 @@ import { Toast } from "@/components/ui/Toast";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 
+import { useEffect } from "react";
 import { View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SettingsProvider, useSettings } from "./context/SettingsContext";
+import { initDatabase } from "./database/db";
 import { useToast } from "./hooks/useToast";
 
 function AppContent() {
   const { toast, hide } = useToast();
-
   const { colors, isDark } = useSettings();
+
+  useEffect(() => {
+    initDatabase();
+  }, []);
 
   return (
     <View style={{ flex: 1 }}>

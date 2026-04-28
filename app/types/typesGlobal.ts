@@ -1,18 +1,22 @@
 export type TypeListRenderHome = {
-  id: string;
+  id: number;
   name: string;
-  itens: { id: string; name: string; checked: boolean }[];
+  itens: TypeItens[];
   favorited: boolean;
+  category_id: number | null;
+  created_at: string;
 };
 
 export type TypeItens = {
-  id: string;
+  id: number;
+  list_id: number;
   name: string;
   checked: boolean;
 };
 
 export interface Categoria {
-  id: string;
+  id: number;
   nome: string;
-  iconeIndex: number;
+  icon: string;
+  created_at: string;
 }
