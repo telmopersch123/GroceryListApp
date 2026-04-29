@@ -21,6 +21,8 @@ import Animated, {
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSettings } from "../context/SettingsContext";
+import { createItem } from "../database/listItemsRepository";
+import { createList } from "../database/listsRepository";
 import { showToast } from "../hooks/useToast";
 
 export default function CriarLista() {
@@ -60,18 +62,13 @@ export default function CriarLista() {
 
     if (temErro) return;
 
-    const novaLista = {
-      id: Date.now().toString(),
-      name: nomeLista,
-      itens: ItensList,
-    };
+    const novaLista = createList(nomeLista.trim());
 
-    router.push({
-      pathname: "/",
-      params: {
-        novaLista: JSON.stringify(novaLista),
-      },
+    ItensList.forEach((item) => {
+      createItem(novaLista.id, item.name);
     });
+
+    router.back();
 
     showToast({
       type: "success",
@@ -99,7 +96,6 @@ export default function CriarLista() {
 
   return (
     <SafeAreaView style={globalStyles.safe} onTouchStart={Keyboard.dismiss}>
-      {/* HEADER */}
       <View style={globalStyles.containerRow}>
         <Pressable onPress={() => router.back()}>
           <ArrowLeft size={24} color={colors.text} />

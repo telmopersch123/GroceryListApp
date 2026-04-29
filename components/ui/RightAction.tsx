@@ -9,11 +9,11 @@ import Animated, {
 export function RightAction({
   prog,
   drag,
-  // onRemover,
+  onRemover,
 }: {
   prog: SharedValue<number>;
   drag: SharedValue<number>;
-  // onRemover: () => void;
+  onRemover: () => void;
 }) {
   const animStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: drag.value + 80 }],
@@ -30,7 +30,7 @@ export function RightAction({
       ]}
     >
       <Pressable
-        // onPress={onRemover}
+        onPress={onRemover}
         style={{
           backgroundColor: "#D32F2F",
           justifyContent: "center",

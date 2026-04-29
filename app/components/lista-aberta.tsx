@@ -1,4 +1,9 @@
 import { useSettings } from "@/app/context/SettingsContext";
+import {
+  getItemsByListId,
+  toggleItem as toggleItemDb,
+} from "@/app/database/listItemsRepository";
+import { getListById } from "@/app/database/listsRepository";
 import { ICONES } from "@/components/categorias/categoriaAccordion";
 import { useGlobalStyles } from "@/constants/globalStyles";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -14,25 +19,8 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { TypeItens, TypeListRenderHome } from "../types/typesGlobal";
-
-const CATEGORIAS_MOCK = [
-  { id: "1", nome: "Limpeza", iconeIndex: 0 },
-  { id: "2", nome: "Frutas", iconeIndex: 1 },
-  { id: "3", nome: "Carnes", iconeIndex: 2 },
-  { id: "4", nome: "Bebidas", iconeIndex: 5 },
-  { id: "5", nome: "Higiene", iconeIndex: 6 },
-  { id: "6", nome: "Padaria", iconeIndex: 3 },
-  { id: "7", nome: "Laticínios", iconeIndex: 4 },
-  { id: "8", nome: "Congelados", iconeIndex: 16 },
-  { id: "9", nome: "Temperos", iconeIndex: 7 },
-  { id: "10", nome: "Petshop", iconeIndex: 9 },
-  { id: "11", nome: "Papelaria", iconeIndex: 10 },
-  { id: "12", nome: "Roupas", iconeIndex: 12 },
-  { id: "13", nome: "Casa", iconeIndex: 13 },
-  { id: "14", nome: "Hortifruti", iconeIndex: 14 },
-  { id: "15", nome: "Presentes", iconeIndex: 17 },
-];
+import { getCategories } from "../database/categoriesRepository";
+import { Categoria, TypeItens, TypeListRenderHome } from "../types/typesGlobal";
 
 export default function ListaAberta() {
   const globalStyles = useGlobalStyles();
@@ -45,10 +33,11 @@ export default function ListaAberta() {
 
   const [modalCategorias, setModalCategorias] = useState(false);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState<
-    string | null
+    number | null
   >(null);
   const [itens, setItens] = useState<TypeItens[]>([]);
   const [lista, setLista] = useState<TypeListRenderHome>();
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
 
   const total = itens.length;
   const concluidos = itens.filter((item) => item.checked).length;
@@ -68,28 +57,34 @@ export default function ListaAberta() {
   }, [porcentagem]);
 
   useEffect(() => {
-    if (params.lista) {
-      const lista = JSON.parse(params.lista as string);
-      const itensFormatados = lista.itens.map((item: TypeItens) => ({
-        ...item,
-        checked: false,
-      }));
-      setLista(lista);
-      setItens(itensFormatados);
-    }
-  }, [params.lista]);
+    console.log("Parâmetros recebidos:", params.id);
+    if (params.id) {
+      const id = Number(params.id);
+      const listaDb = getListById(id);
 
-  function toggleItem(id: string) {
+      if (listaDb) {
+        setLista(listaDb);
+        setItens(getItemsByListId(id));
+        setCategoriaSelecionada(listaDb.category_id);
+      }
+    }
+
+    setCategorias(getCategories());
+  }, [params.id]);
+
+  function toggleItem(id: number) {
     setItens((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, checked: !item.checked } : item
-      )
+      prev.map((item) => {
+        if (item.id === id) {
+          toggleItemDb(id, !item.checked);
+          return { ...item, checked: !item.checked };
+        }
+        return item;
+      })
     );
   }
 
-  const categoriaAtual = CATEGORIAS_MOCK.find(
-    (c) => c.id === categoriaSelecionada
-  );
+  const categoriaAtual = categorias.find((c) => c.id === categoriaSelecionada);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -98,7 +93,6 @@ export default function ListaAberta() {
         <Pressable onPress={() => router.back()}>
           <ArrowLeft size={24} color={colors.text} />
         </Pressable>
-
         <Text style={styles.title}>{lista?.name}</Text>
       </View>
 
@@ -118,7 +112,6 @@ export default function ListaAberta() {
 
       {/* ACTIONS */}
       <View style={styles.actions}>
-        {/* EDITAR (CORRIGIDO) */}
         <Pressable
           style={({ pressed }) => [
             globalStyles.actionButton,
@@ -127,9 +120,7 @@ export default function ListaAberta() {
           onPress={() =>
             router.push({
               pathname: "/components/editar-lista",
-              params: {
-                lista: JSON.stringify(lista),
-              },
+              params: { id: lista?.id },
             })
           }
         >
@@ -161,7 +152,7 @@ export default function ListaAberta() {
           <Text
             style={[
               styles.actionText,
-              categoriaSelecionada && { color: colors.primary },
+              categoriaSelecionada ? { color: colors.primary } : null,
             ]}
           >
             {categoriaAtual ? categoriaAtual.nome : "Categorizar"}
@@ -206,8 +197,8 @@ export default function ListaAberta() {
             </View>
 
             <ScrollView contentContainerStyle={{ gap: 12 }}>
-              {CATEGORIAS_MOCK.map((categoria) => {
-                const Icone = ICONES[categoria.iconeIndex];
+              {categorias.map((categoria) => {
+                const Icone = ICONES[parseInt(categoria.icon)];
                 const selecionado = categoriaSelecionada === categoria.id;
 
                 return (

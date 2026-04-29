@@ -1,5 +1,6 @@
 import { TypeListRenderHome } from "../types/typesGlobal";
 import db from "./db";
+import { getItemsByListId } from "./listItemsRepository";
 
 export function createList(
   name: string,
@@ -33,7 +34,7 @@ export function getLists(): TypeListRenderHome[] {
     id: row.id,
     name: row.name,
     category_id: row.category_id,
-    itens: [],
+    itens: getItemsByListId(row.id),
     favorited: row.is_favorite === 1,
     created_at: row.created_at,
   }));

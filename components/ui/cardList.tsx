@@ -1,4 +1,5 @@
 import { useSettings } from "@/app/context/SettingsContext";
+import { deleteList } from "@/app/database/listsRepository";
 import { TypeListRenderHome } from "@/app/types/typesGlobal";
 import { FavoritedList } from "@/app/utils/functionFavorited";
 import { SwipeableRef } from "@/app/utils/functionsSwipe";
@@ -30,10 +31,17 @@ export default function CardList({
 }: PropsCardList) {
   const { animationsEnabled, colors } = useSettings();
   const globalStyles = useGlobalStyles();
-
   const swipeableRef = useRef<SwipeableRef | null>(null);
   const [isSwiping, setIsSwiping] = useState(false);
 
+  const total = lista.itens.length;
+  const concluidos = lista.itens.filter((item) => item.checked).length;
+  const porcentagem = total === 0 ? 0 : Math.round((concluidos / total) * 100);
+
+  function onRemover() {
+    deleteList(lista.id);
+    setListas((prev) => prev.filter((l) => l.id !== lista.id));
+  }
   return (
     <Animated.View
       entering={
@@ -59,7 +67,7 @@ export default function CardList({
         renderRightActions={(
           prog: SharedValue<number>,
           drag: SharedValue<number>
-        ) => <RightAction prog={prog} drag={drag} />}
+        ) => <RightAction prog={prog} drag={drag} onRemover={onRemover} />}
         onSwipeableWillOpen={() => setIsSwiping(true)}
         onSwipeableClose={() => setIsSwiping(false)}
         onSwipeableWillClose={() => setIsSwiping(false)}
@@ -72,7 +80,7 @@ export default function CardList({
           onPress={() =>
             router.push({
               pathname: "/components/lista-aberta",
-              params: { lista: JSON.stringify(lista) },
+              params: { id: lista.id },
             })
           }
           style={[
@@ -140,7 +148,7 @@ export default function CardList({
                   globalStyles.progressBar,
                   {
                     backgroundColor: colors.primary,
-                    width: "40%",
+                    width: `${porcentagem}%`,
                   },
                 ]}
               />
@@ -149,12 +157,12 @@ export default function CardList({
             <Text
               style={[globalStyles.progressText, { color: colors.subtext }]}
             >
-              0%
+              {porcentagem}%
             </Text>
           </View>
 
           <Text style={[globalStyles.itemsText, { color: colors.subtext }]}>
-            0/{lista.itens.length} itens
+            {concluidos}/{total} itens concluídos
           </Text>
         </Pressable>
       </ReanimatedSwipeable>

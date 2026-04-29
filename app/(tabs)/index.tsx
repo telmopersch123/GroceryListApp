@@ -2,7 +2,7 @@ import CardList from "@/components/ui/cardList";
 
 import { useGlobalStyles } from "@/constants/globalStyles";
 import { useIsFocused } from "@react-navigation/native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { Plus, ShoppingCart } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
@@ -11,6 +11,7 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { useSettings } from "../context/SettingsContext";
+import { getLists } from "../database/listsRepository";
 import { TypeListRenderHome } from "../types/typesGlobal";
 import { closeAllSwipes, SwipeableRef } from "../utils/functionsSwipe";
 export default function Home() {
@@ -20,15 +21,14 @@ export default function Home() {
   const isFocused = useIsFocused();
   const router = useRouter();
   const [listas, setListas] = useState<TypeListRenderHome[]>([]);
-  const params = useLocalSearchParams();
   const openSwipeRef = useRef<SwipeableRef | null>(null);
 
   useEffect(() => {
-    if (params.novaLista) {
-      const lista = JSON.parse(params.novaLista as string);
-      setListas((prev) => [...prev, lista]);
+    if (isFocused) {
+      const listasDb = getLists();
+      setListas(listasDb);
     }
-  }, [params.novaLista]);
+  }, [isFocused]);
 
   return (
     <SafeAreaView
