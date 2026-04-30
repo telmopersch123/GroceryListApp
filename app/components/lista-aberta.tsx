@@ -7,7 +7,7 @@ import { getListById } from "@/app/database/listsRepository";
 import { ICONES } from "@/components/categorias/categoriaAccordion";
 import { useGlobalStyles } from "@/constants/globalStyles";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ArrowLeft, Check, Heart, Pencil, Tag, X } from "lucide-react-native";
+import { ArrowLeft, Check, Pencil, Star, Tag, X } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -21,6 +21,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { getCategories } from "../database/categoriesRepository";
 import { Categoria, TypeItens, TypeListRenderHome } from "../types/typesGlobal";
+import { FavoritedSingleList } from "../utils/functionFavorited";
 
 export default function ListaAberta() {
   const globalStyles = useGlobalStyles();
@@ -132,10 +133,24 @@ export default function ListaAberta() {
           style={({ pressed }) => [
             globalStyles.actionButton,
             pressed && globalStyles.actionButtonPressed,
+            lista?.favorited && { borderColor: "rgba(255, 215, 0, 0.4)" },
           ]}
+          onPress={() => {
+            if (lista) {
+              FavoritedSingleList(lista, setLista);
+            }
+          }}
         >
-          <Heart size={16} color={colors.text} />
-          <Text style={styles.actionText}>Favoritar</Text>
+          <Star
+            size={18}
+            color={lista?.favorited ? "#FFD700" : colors.iconColor}
+            fill={lista?.favorited ? "#FFD700" : "transparent"}
+          />
+          <Text
+            style={[styles.actionText, lista?.favorited && { color: "#fff" }]}
+          >
+            {lista?.favorited ? "Desfavoritar" : "Favoritar"}
+          </Text>
         </Pressable>
 
         <Pressable

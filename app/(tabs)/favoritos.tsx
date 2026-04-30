@@ -2,40 +2,27 @@ import CardList from "@/components/ui/cardList";
 
 import { useGlobalStyles } from "@/constants/globalStyles";
 import { useIsFocused } from "@react-navigation/native";
-import { useLocalSearchParams } from "expo-router";
 import { Heart } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSettings } from "../context/SettingsContext";
+import { getFavoriteLists } from "../database/listsRepository";
 import { TypeListRenderHome } from "../types/typesGlobal";
 import { closeAllSwipes, SwipeableRef } from "../utils/functionsSwipe";
 export default function Favorites() {
   const { colors } = useSettings();
   const globalStyles = useGlobalStyles();
   const isFocused = useIsFocused();
-  const params = useLocalSearchParams();
   const openSwipeRef = useRef<SwipeableRef | null>(null);
-  const [listas, setListas] = useState<TypeListRenderHome[]>([
-    {
-      id: "1",
-      name: "Compras do mês",
-      favorited: true,
-      itens: [
-        { id: "1", name: "Arroz", checked: false },
-        { id: "2", name: "Feijão", checked: false },
-      ],
-    },
-  ]);
+  const [listas, setListas] = useState<TypeListRenderHome[]>([]);
 
   useEffect(() => {
-    if (params.novaLista) {
-      const lista = JSON.parse(params.novaLista as string);
-      setListas((prev) => [...prev, lista]);
+    if (isFocused) {
+      const listasDb = getFavoriteLists();
+      setListas(listasDb);
     }
-  }, [params.novaLista]);
-
-  const favoritas = listas.filter((l) => l.favorited);
+  }, [isFocused]);
 
   return (
     <SafeAreaView
@@ -56,7 +43,7 @@ export default function Favorites() {
             marginHorizontal: -20,
           }}
         />
-        {favoritas.length === 0 ? (
+        {listas.length === 0 ? (
           <View style={globalStyles.emptyContainer}>
             <View style={globalStyles.iconCircle}>
               <Heart size={32} color="#424242" />
@@ -73,13 +60,14 @@ export default function Favorites() {
             key={isFocused ? "focused" : "unfocused"}
           >
             <ScrollView>
-              {favoritas.map((lista, index) => (
+              {listas.map((lista, index) => (
                 <CardList
                   key={lista.id}
                   lista={lista}
                   setListas={setListas}
                   openSwipeRef={openSwipeRef}
                   index={index}
+                  flag="favorites"
                 />
               ))}
             </ScrollView>

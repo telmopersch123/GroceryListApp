@@ -97,7 +97,7 @@ export function getFavoriteLists(): TypeListRenderHome[] {
     id: row.id,
     name: row.name,
     category_id: row.category_id,
-    itens: [],
+    itens: getItemsByListId(row.id),
     favorited: row.is_favorite === 1,
     created_at: row.created_at,
   }));

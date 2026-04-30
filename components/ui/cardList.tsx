@@ -21,6 +21,7 @@ interface PropsCardList {
   setListas: React.Dispatch<React.SetStateAction<TypeListRenderHome[]>>;
   openSwipeRef: RefObject<SwipeableRef | null>;
   index: number;
+  flag?: string;
 }
 
 export default function CardList({
@@ -28,6 +29,7 @@ export default function CardList({
   setListas,
   openSwipeRef,
   index,
+  flag,
 }: PropsCardList) {
   const { animationsEnabled, colors } = useSettings();
   const globalStyles = useGlobalStyles();
@@ -113,7 +115,7 @@ export default function CardList({
               </Pressable>
 
               <Pressable
-                onPress={() => FavoritedList(lista, setListas)}
+                onPress={() => FavoritedList(lista, setListas, flag)}
                 style={({ pressed }) => [
                   globalStyles.iconButton,
                   pressed && { transform: [{ scale: 0.9 }] },
