@@ -20,11 +20,20 @@ import Animated, {
   LinearTransition,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { TypeItens } from "../types/typesGlobal";
+import { getItemsByListId } from "../database/listItemsRepository";
+import { getListById, updateList } from "../database/listsRepository";
+import { showToast } from "../hooks/useToast";
+import { TypeItens, TypeListRenderHome } from "../types/typesGlobal";
 
 export default function EditarLista() {
   const globalStyles = useGlobalStyles();
   const { colors, animationsEnabled } = useSettings();
+
+  const [lista, setLista] = useState<TypeListRenderHome>();
+  // const [categorias, setCategorias] = useState<Categoria[]>([]);
+  // const [categoriaSelecionada, setCategoriaSelecionada] = useState<
+  //   number | null
+  // >(null);
   const styles = makeStyles(colors);
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -32,23 +41,21 @@ export default function EditarLista() {
   const [erroItem, setErroItem] = useState("");
   const [nomeLista, setNomeLista] = useState("");
   const [itemInput, setItemInput] = useState("");
-  const [ItensList, setItensList] = useState<{ id: string; name: string }[]>(
-    []
-  );
-
+  const [ItensList, setItensList] = useState<TypeItens[]>([]);
+  const from = params.flag;
   useEffect(() => {
-    if (params.lista) {
-      const lista = JSON.parse(params.lista as string);
-
-      const itensFormatados = lista.itens.map((item: TypeItens) => ({
-        ...item,
-        checked: false,
-      }));
-
-      setItensList(itensFormatados);
-      setNomeLista(lista.name);
+    if (params.id) {
+      const id = Number(params.id);
+      const listaDb = getListById(id);
+      if (listaDb) {
+        setLista(listaDb);
+        setItensList(getItemsByListId(id));
+        setNomeLista(listaDb.name);
+        // setCategoriaSelecionada(listaDb.category_id);
+      }
     }
-  }, [params.lista]);
+    // setCategorias(getCategories());
+  }, [params.id]);
 
   function handleSalvar() {
     let temErro = false;
@@ -69,27 +76,47 @@ export default function EditarLista() {
 
     if (temErro) return;
 
-    const novaLista = {
-      id: Date.now().toString(),
-      name: nomeLista,
-      itens: ItensList,
-    };
+    updateList(
+      Number(params.id),
+      nomeLista.trim(),
+      lista?.category_id ?? null,
+      ItensList
+    );
 
     router.push({
       pathname: "/components/lista-aberta",
-      params: {
-        lista: JSON.stringify(novaLista),
-      },
+      params: { id: lista?.id, from: from },
+    });
+
+    showToast({
+      type: "success",
+      text1: "Pronto",
+      text2: "A sua lista foi criada com sucesso!",
     });
   }
 
-  function handleRemover(id: string) {
+  function handleAddItem() {
+    if (!itemInput.trim()) return;
+
+    const novoItem = {
+      id: Date.now(),
+      name: itemInput,
+      list_id: Number(params.id),
+      checked: false,
+    };
+
+    setItensList((prev) => [...prev, novoItem]);
+    setItemInput("");
+    setErroItem("");
+  }
+
+  function handleRemover(id: number) {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setItensList((prev) => prev.filter((item) => item.id !== id));
   }
 
   return (
-    <SafeAreaView style={styles.container} onTouchStart={Keyboard.dismiss}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()}>
           <ArrowLeft size={24} color={colors.text} />
@@ -125,10 +152,8 @@ export default function EditarLista() {
             maxLength={35}
             onChangeText={(text) => {
               setItemInput(text);
-
               if (text.length >= 35)
                 return setErroItem("Limite de 35 caracteres");
-
               if (text.trim()) setErroItem("");
             }}
             style={[
@@ -140,20 +165,8 @@ export default function EditarLista() {
 
           <Pressable
             onPress={() => {
-              if (!itemInput.trim()) return;
-
-              LayoutAnimation.configureNext(
-                LayoutAnimation.Presets.easeInEaseOut
-              );
-
-              const novoItem = {
-                id: Date.now().toString(),
-                name: itemInput,
-              };
-
-              setItensList((prev) => [...prev, novoItem]);
-              setItemInput("");
-              setErroItem("");
+              Keyboard.dismiss();
+              handleAddItem();
             }}
             style={globalStyles.addButton}
           >
@@ -168,6 +181,7 @@ export default function EditarLista() {
         contentContainerStyle={{ paddingBottom: 100 }}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
+        showsVerticalScrollIndicator={false}
       >
         {ItensList.map((item) => (
           <Animated.View

@@ -34,7 +34,7 @@ export default function CriarLista() {
   const [item, setItem] = useState("");
   const [erroNome, setErroNome] = useState("");
   const [erroItem, setErroItem] = useState("");
-  const [ItensList, setItensList] = useState<{ id: string; name: string }[]>(
+  const [ItensList, setItensList] = useState<{ id: number; name: string }[]>(
     []
   );
 
@@ -77,7 +77,7 @@ export default function CriarLista() {
     });
   }
 
-  function handleRemover(id: string) {
+  function handleRemover(id: number) {
     setItensList((prev) => prev.filter((item) => item.id !== id));
   }
 
@@ -85,8 +85,10 @@ export default function CriarLista() {
     if (!item.trim()) return;
 
     const novoItem = {
-      id: Date.now().toString(),
+      id: Date.now(),
       name: item,
+      list_id: null,
+      checked: false,
     };
 
     setItensList((prev) => [...prev, novoItem]);
@@ -95,7 +97,7 @@ export default function CriarLista() {
   }
 
   return (
-    <SafeAreaView style={globalStyles.safe} onTouchStart={Keyboard.dismiss}>
+    <SafeAreaView style={globalStyles.safe}>
       <View style={globalStyles.containerRow}>
         <Pressable onPress={() => router.back()}>
           <ArrowLeft size={24} color={colors.text} />
@@ -145,7 +147,13 @@ export default function CriarLista() {
             ]}
           />
 
-          <Pressable onPress={handleAddItem} style={globalStyles.addButton}>
+          <Pressable
+            onPress={() => {
+              Keyboard.dismiss();
+              handleAddItem();
+            }}
+            style={globalStyles.addButton}
+          >
             <Plus size={20} color="#fff" />
           </Pressable>
         </View>
@@ -158,6 +166,7 @@ export default function CriarLista() {
         contentContainerStyle={{ paddingBottom: 120 }}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
+        showsVerticalScrollIndicator={false}
       >
         <View style={globalStyles.listContainer}>
           {ItensList.map((item) => (

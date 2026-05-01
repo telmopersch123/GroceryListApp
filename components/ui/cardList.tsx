@@ -1,5 +1,5 @@
 import { useSettings } from "@/app/context/SettingsContext";
-import { deleteList } from "@/app/database/listsRepository";
+import { createList, deleteList } from "@/app/database/listsRepository";
 import { TypeListRenderHome } from "@/app/types/typesGlobal";
 import { FavoritedList } from "@/app/utils/functionFavorited";
 import { SwipeableRef } from "@/app/utils/functionsSwipe";
@@ -44,6 +44,23 @@ export default function CardList({
     deleteList(lista.id);
     setListas((prev) => prev.filter((l) => l.id !== lista.id));
   }
+
+  function CopyList(
+    lista: TypeListRenderHome,
+    setListas: React.Dispatch<React.SetStateAction<TypeListRenderHome[]>>
+  ) {
+    try {
+      const novaLista = createList(
+        lista.name,
+        lista.category_id,
+        lista.itens,
+        "copy"
+      );
+      setListas((prev) => [...prev, novaLista]);
+    } catch (error) {
+      console.log(error);
+    }
+  }
   return (
     <Animated.View
       entering={
@@ -82,7 +99,10 @@ export default function CardList({
           onPress={() =>
             router.push({
               pathname: "/components/lista-aberta",
-              params: { id: lista.id },
+              params: {
+                id: lista.id,
+                from: flag ?? "home",
+              },
             })
           }
           style={[
@@ -105,6 +125,9 @@ export default function CardList({
                   globalStyles.iconButton,
                   pressed && { transform: [{ scale: 0.9 }] },
                 ]}
+                onPress={() => {
+                  CopyList(lista, setListas);
+                }}
               >
                 {({ pressed }) => (
                   <Copy

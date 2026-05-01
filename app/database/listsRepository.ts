@@ -1,21 +1,35 @@
-import { TypeListRenderHome } from "../types/typesGlobal";
+import { TypeItens, TypeListRenderHome } from "../types/typesGlobal";
 import db from "./db";
-import { getItemsByListId } from "./listItemsRepository";
+import { createItem, getItemsByListId } from "./listItemsRepository";
 
 export function createList(
   name: string,
-  category_id: number | null = null
+  category_id: number | null = null,
+  itens?: TypeItens[],
+  flag?: string
 ): TypeListRenderHome {
+  const finalName = flag === "copy" ? `${name} (copy)` : name;
   const result = db.runSync(
     "INSERT INTO lists (name, category_id) VALUES (?, ?)",
-    [name, category_id]
+    [finalName, category_id]
   );
 
+  const newListId = result.lastInsertRowId;
+
+  if (flag === "copy" && itens && itens.length > 0) {
+    for (const item of itens) {
+      createItem(newListId, item.name);
+    }
+  }
+
   return {
-    id: result.lastInsertRowId,
-    name,
+    id: newListId,
+    name: finalName,
     category_id,
-    itens: [],
+    itens:
+      flag === "copy" && itens
+        ? itens.map((i) => ({ ...i, list_id: newListId, checked: false }))
+        : [],
     favorited: false,
     created_at: new Date().toISOString(),
   };
@@ -64,13 +78,27 @@ export function getListById(id: number): TypeListRenderHome | null {
 export function updateList(
   id: number,
   name: string,
-  category_id: number | null = null
-): void {
+  category_id: number | null = null,
+  itens: TypeItens[] = []
+): TypeListRenderHome {
   db.runSync("UPDATE lists SET name = ?, category_id = ? WHERE id = ?", [
     name,
     category_id,
     id,
   ]);
+  db.runSync("DELETE FROM list_items WHERE list_id = ?", [id]);
+  for (const item of itens) {
+    createItem(id, item.name);
+  }
+
+  return {
+    id,
+    name,
+    category_id,
+    itens: itens.map((i) => ({ ...i, list_id: id })),
+    favorited: getListById(id)?.favorited || false,
+    created_at: getListById(id)?.created_at || new Date().toISOString(),
+  };
 }
 
 export function toggleFavorite(id: number, favorited: boolean): void {

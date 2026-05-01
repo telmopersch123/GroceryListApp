@@ -39,7 +39,7 @@ export default function ListaAberta() {
   const [itens, setItens] = useState<TypeItens[]>([]);
   const [lista, setLista] = useState<TypeListRenderHome>();
   const [categorias, setCategorias] = useState<Categoria[]>([]);
-
+  const from = params.from;
   const total = itens.length;
   const concluidos = itens.filter((item) => item.checked).length;
   const porcentagem = total === 0 ? 0 : (concluidos / total) * 100;
@@ -58,7 +58,6 @@ export default function ListaAberta() {
   }, [porcentagem]);
 
   useEffect(() => {
-    console.log("Parâmetros recebidos:", params.id);
     if (params.id) {
       const id = Number(params.id);
       const listaDb = getListById(id);
@@ -91,7 +90,16 @@ export default function ListaAberta() {
     <SafeAreaView style={styles.container}>
       {/* HEADER */}
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()}>
+        <Pressable
+          onPress={() => {
+            console.log(from);
+            if (from === "favorites") {
+              router.replace("/(tabs)/favoritos");
+            } else {
+              router.push("/");
+            }
+          }}
+        >
           <ArrowLeft size={24} color={colors.text} />
         </Pressable>
         <Text style={styles.title}>{lista?.name}</Text>
@@ -121,7 +129,7 @@ export default function ListaAberta() {
           onPress={() =>
             router.push({
               pathname: "/components/editar-lista",
-              params: { id: lista?.id },
+              params: { id: lista?.id, flag: from },
             })
           }
         >
