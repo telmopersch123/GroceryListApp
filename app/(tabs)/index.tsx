@@ -65,7 +65,7 @@ export default function Home() {
             style={{ marginTop: 20, flex: 1, overflow: "hidden" }}
             key={isFocused ? "focused" : "unfocused"}
           >
-            <ScrollView>
+            <ScrollView showsVerticalScrollIndicator={false}>
               {listas.map((lista, index) => (
                 <CardList
                   key={lista.id}

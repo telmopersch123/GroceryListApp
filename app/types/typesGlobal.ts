@@ -17,6 +17,6 @@ export type TypeItens = {
 export interface Categoria {
   id: number;
   nome: string;
-  icon: string;
+  icon: number;
   created_at: string;
 }

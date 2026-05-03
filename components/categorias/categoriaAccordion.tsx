@@ -55,16 +55,18 @@ export function CategoriaAccordion({
   listas,
   setListas,
   openSwipeRef,
+  handleRemove,
 }: {
   categoria: Categoria;
   listas: TypeListRenderHome[];
   setListas: React.Dispatch<React.SetStateAction<TypeListRenderHome[]>>;
   openSwipeRef: RefObject<SwipeableRef | null>;
+  handleRemove: (id: number | null) => void;
 }) {
   const { colors, animationsEnabled } = useSettings();
   const styles = makeStyles(colors);
   const animOpen = useRef(new Animated.Value(0)).current;
-
+  const [contentHeight, setContentHeight] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [isSwiping, setIsSwiping] = useState(false);
 
@@ -104,7 +106,22 @@ export function CategoriaAccordion({
     outputRange: ["0deg", "90deg"],
   });
 
-  const Icone = ICONES[categoria.iconeIndex];
+  const Icone = ICONES[categoria.icon];
+
+  const renderContent = () =>
+    listas.length > 0 ? (
+      listas.map((lista, index) => (
+        <CardList
+          key={lista.id}
+          lista={lista}
+          setListas={setListas}
+          openSwipeRef={openSwipeRef}
+          index={index}
+        />
+      ))
+    ) : (
+      <Text style={styles.emptyListas}>Nenhuma lista nesta categoria.</Text>
+    );
 
   return (
     <ReanimatedSwipeable
@@ -124,7 +141,14 @@ export function CategoriaAccordion({
       renderRightActions={(
         prog: SharedValue<number>,
         drag: SharedValue<number>
-      ) => <RightAction prog={prog} drag={drag} />}
+      ) => (
+        <RightAction
+          prog={prog}
+          drag={drag}
+          onRemover={handleRemove}
+          categoriaId={categoria.id}
+        />
+      )}
       overshootRight={false}
       friction={1}
     >
@@ -154,53 +178,74 @@ export function CategoriaAccordion({
         </Pressable>
 
         {animationsEnabled ? (
-          <Animated.View
-            style={{
-              height: animOpen.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, 500],
-              }),
-              opacity: animOpen,
-              overflow: "hidden",
-            }}
-          >
-            <View style={styles.accordionContent}>
-              {listas.length > 0 ? (
-                listas.map((lista, index) => (
-                  <CardList
-                    key={lista.id}
-                    lista={lista}
-                    setListas={setListas}
-                    openSwipeRef={openSwipeRef}
-                    index={index}
-                  />
-                ))
-              ) : (
-                <Text style={styles.emptyListas}>
-                  Nenhuma lista nesta categoria.
-                </Text>
-              )}
+          <>
+            <View
+              style={{
+                position: "absolute",
+                opacity: 0,
+                zIndex: -1,
+                left: 0,
+                right: 0,
+              }}
+              pointerEvents="none"
+              onLayout={(e) => {
+                const h = e.nativeEvent.layout.height;
+                if (h !== contentHeight) {
+                  setContentHeight(h);
+                }
+              }}
+            >
+              <View style={styles.accordionContent}>
+                {listas.length > 0 ? (
+                  listas.map((lista, index) => (
+                    <CardList
+                      key={lista.id}
+                      lista={lista}
+                      setListas={setListas}
+                      openSwipeRef={openSwipeRef}
+                      index={index}
+                    />
+                  ))
+                ) : (
+                  <Text style={styles.emptyListas}>
+                    Nenhuma lista nesta categoria.
+                  </Text>
+                )}
+              </View>
             </View>
-          </Animated.View>
+            <Animated.View
+              style={{
+                height: animOpen.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, contentHeight],
+                }),
+                opacity: animOpen,
+                overflow: "hidden",
+              }}
+            >
+              <View style={styles.accordionContent}>
+                {listas.length > 0 ? (
+                  listas.map((lista, index) => (
+                    <CardList
+                      key={lista.id}
+                      lista={lista}
+                      setListas={setListas}
+                      openSwipeRef={openSwipeRef}
+                      index={index}
+                      flag="category"
+                    />
+                  ))
+                ) : (
+                  <Text style={styles.emptyListas}>
+                    Nenhuma lista nesta categoria.
+                  </Text>
+                )}
+              </View>
+            </Animated.View>
+          </>
         ) : isOpen ? (
           <View style={{ overflow: "hidden" }}>
-            <View style={styles.accordionContent}>
-              {listas.length > 0 ? (
-                listas.map((lista, index) => (
-                  <CardList
-                    key={lista.id}
-                    lista={lista}
-                    setListas={setListas}
-                    openSwipeRef={openSwipeRef}
-                    index={index}
-                  />
-                ))
-              ) : (
-                <Text style={styles.emptyListas}>
-                  Nenhuma lista nesta categoria.
-                </Text>
-              )}
-            </View>
+            <View style={styles.accordionContent}>{renderContent()}</View>
           </View>
         ) : null}
       </View>

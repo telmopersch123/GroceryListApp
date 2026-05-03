@@ -1,4 +1,5 @@
 import { useSettings } from "@/app/context/SettingsContext";
+import { showToast } from "@/app/hooks/useToast";
 import { CheckCircle, Info, XCircle } from "lucide-react-native";
 import React, { useEffect, useRef } from "react";
 import { Animated, Text, View } from "react-native";
@@ -12,6 +13,7 @@ interface Props {
   text2?: string;
   onHide: () => void;
   visibilityTime?: number;
+  id: number;
 }
 
 export function Toast({
@@ -21,6 +23,7 @@ export function Toast({
   text2,
   onHide,
   visibilityTime = 3000,
+  id,
 }: Props) {
   const { colors } = useSettings();
   const translateX = useRef(new Animated.Value(400)).current;
@@ -59,7 +62,7 @@ export function Toast({
 
       return () => clearTimeout(timeout);
     }
-  }, [visible]);
+  }, [id]);
 
   return (
     <Animated.View
@@ -114,3 +117,11 @@ export function Toast({
     </Animated.View>
   );
 }
+
+export const toastSuccess = (msg: string) => {
+  showToast({ type: "success", text1: "Pronto", text2: msg });
+};
+
+export const toastError = (msg: string) => {
+  showToast({ type: "error", text1: "Ops", text2: msg });
+};

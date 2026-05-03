@@ -6,12 +6,14 @@ export function createList(
   name: string,
   category_id: number | null = null,
   itens?: TypeItens[],
-  flag?: string
+  flag?: string,
+  typeCopy?: string
 ): TypeListRenderHome {
   const finalName = flag === "copy" ? `${name} (copy)` : name;
+  const isFavorite = typeCopy === "favorites" ? 1 : 0;
   const result = db.runSync(
-    "INSERT INTO lists (name, category_id) VALUES (?, ?)",
-    [finalName, category_id]
+    "INSERT INTO lists (name, category_id, is_favorite) VALUES  (?, ?, ?)",
+    [finalName, category_id, isFavorite]
   );
 
   const newListId = result.lastInsertRowId;
@@ -30,7 +32,7 @@ export function createList(
       flag === "copy" && itens
         ? itens.map((i) => ({ ...i, list_id: newListId, checked: false }))
         : [],
-    favorited: false,
+    favorited: typeCopy === "favorites" ? true : false,
     created_at: new Date().toISOString(),
   };
 }
@@ -99,6 +101,16 @@ export function updateList(
     favorited: getListById(id)?.favorited || false,
     created_at: getListById(id)?.created_at || new Date().toISOString(),
   };
+}
+
+export function updateListCategory(
+  id: number,
+  category_id: number | null
+): void {
+  db.runSync("UPDATE lists SET category_id = ? WHERE id = ?", [
+    category_id,
+    id,
+  ]);
 }
 
 export function toggleFavorite(id: number, favorited: boolean): void {

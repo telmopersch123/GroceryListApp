@@ -68,6 +68,7 @@ export default function Favorites() {
                   openSwipeRef={openSwipeRef}
                   index={index}
                   flag="favorites"
+                  typeCopy="favorites"
                 />
               ))}
             </ScrollView>

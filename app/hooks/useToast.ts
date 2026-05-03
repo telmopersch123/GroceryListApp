@@ -10,6 +10,7 @@ interface ToastData {
 
 interface ToastState extends ToastData {
   visible: boolean;
+  id: number;
 }
 
 let externalShow: ((data: ToastData) => void) | null = null;
@@ -19,10 +20,11 @@ export function useToast() {
     visible: false,
     type: "success",
     text1: "",
+    id: 0,
   });
 
   const show = (data: ToastData) => {
-    setToast({ ...data, visible: true });
+    setToast({ ...data, visible: true, id: Date.now() });
   };
 
   const hide = () => {

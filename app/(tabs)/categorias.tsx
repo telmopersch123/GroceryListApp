@@ -1,8 +1,10 @@
 import { CategoriaAccordion } from "@/components/categorias/categoriaAccordion";
 import { CategoryModal } from "@/components/categorias/ModalCategorias";
+import { LoadingDots } from "@/components/ui/Loading";
+import { toastError, toastSuccess } from "@/components/ui/Toast";
 import { useGlobalStyles } from "@/constants/globalStyles";
 import { LayoutGrid, Plus } from "lucide-react-native";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Keyboard,
   Pressable,
@@ -13,9 +15,32 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSettings } from "../context/SettingsContext";
+import {
+  createCategory,
+  deleteCategory,
+  getCategories,
+} from "../database/categoriesRepository";
+import { getLists } from "../database/listsRepository";
 import { showToast } from "../hooks/useToast";
 import { Categoria, TypeListRenderHome } from "../types/typesGlobal";
 import { closeAllSwipes, SwipeableRef } from "../utils/functionsSwipe";
+
+function actionsheet({
+  setModalVisivel,
+  setNomeCategoria,
+  setIconeSelecionado,
+  setError,
+}: {
+  setModalVisivel: React.Dispatch<React.SetStateAction<boolean>>;
+  setNomeCategoria: React.Dispatch<React.SetStateAction<string>>;
+  setIconeSelecionado: React.Dispatch<React.SetStateAction<number>>;
+  setError: React.Dispatch<React.SetStateAction<string>>;
+}) {
+  setError("");
+  setNomeCategoria("");
+  setIconeSelecionado(0);
+  setModalVisivel(false);
+}
 
 export default function Categorias() {
   const { colors } = useSettings();
@@ -23,91 +48,95 @@ export default function Categorias() {
   const styles = makeStyles(colors);
 
   const openSwipeRef = useRef<SwipeableRef | null>(null);
-
+  const [loading, setLoading] = useState(true);
   const [modalVisivel, setModalVisivel] = useState(false);
   const [nomeCategoria, setNomeCategoria] = useState("");
   const [iconeSelecionado, setIconeSelecionado] = useState(0);
   const [error, setError] = useState("");
   const [categorias, setCategorias] = useState<Categoria[]>([]);
 
-  const [listas, setListas] = useState<TypeListRenderHome[]>([
-    {
-      id: "1",
-      name: "Compras do mês",
-      favorited: true,
-      itens: [
-        { id: "1", name: "Arroz", checked: false },
-        { id: "2", name: "Feijão", checked: false },
-      ],
-    },
-    {
-      id: "2",
-      name: "Mercado da semana",
-      favorited: false,
-      itens: [
-        { id: "1", name: "Leite", checked: false },
-        { id: "2", name: "Ovos", checked: false },
-        { id: "3", name: "Pão francês", checked: false },
-      ],
-    },
-    {
-      id: "3",
-      name: "Churrasco fim de semana",
-      favorited: false,
-      itens: [
-        { id: "1", name: "Carne bovina", checked: false },
-        { id: "2", name: "Carvão", checked: false },
-        { id: "3", name: "Cerveja", checked: false },
-      ],
-    },
-    {
-      id: "4",
-      name: "Casa e limpeza",
-      favorited: false,
-      itens: [
-        { id: "1", name: "Detergente", checked: false },
-        { id: "2", name: "Desinfetante", checked: false },
-        { id: "3", name: "Esponja", checked: false },
-      ],
-    },
-    {
-      id: "5",
-      name: "Hortifruti saudável",
-      favorited: true,
-      itens: [
-        { id: "1", name: "Banana", checked: false },
-        { id: "2", name: "Maçã", checked: false },
-        { id: "3", name: "Alface", checked: false },
-      ],
-    },
-  ]);
+  const [listas, setListas] = useState<TypeListRenderHome[]>([]);
 
   const handleCreateCategory = () => {
     if (!nomeCategoria.trim()) {
-      setError("O nome da categoria é obrigatório.");
+      const msg = "O nome da categoria é obrigatório.";
+      setError(msg);
+      toastError(msg);
       return;
     }
 
-    setCategorias((prev) => [
-      ...prev,
-      {
-        id: Date.now().toString(),
-        nome: nomeCategoria,
-        iconeIndex: iconeSelecionado,
-      },
-    ]);
+    if (categorias.some((c) => c.nome === nomeCategoria)) {
+      const msg = "Já existe uma categoria com esse nome.";
+      setError(msg);
+      toastError(msg);
+      return;
+    }
 
-    setError("");
-    setNomeCategoria("");
-    setIconeSelecionado(0);
-    setModalVisivel(false);
+    try {
+      const result = createCategory(nomeCategoria, iconeSelecionado);
 
-    showToast({
-      type: "success",
-      text1: "Pronto",
-      text2: "Categoria criada com sucesso!",
+      if (result) {
+        setCategorias((prev) => [...prev, result]);
+        toastSuccess("Categoria criada com sucesso!");
+      } else {
+        toastError("Ocorreu um erro ao criar a categoria.");
+      }
+    } catch (error) {
+      toastError("Ocorreu um erro ao criar a categoria.");
+    }
+
+    actionsheet({
+      setModalVisivel,
+      setNomeCategoria,
+      setIconeSelecionado,
+      setError,
     });
   };
+
+  const handleRemove = (idCategory: number | null) => {
+    try {
+      if (idCategory === null) return;
+      const results = deleteCategory(idCategory);
+      if (results) {
+        setCategorias((prev) => prev.filter((c) => c.id !== idCategory));
+        showToast({
+          type: "success",
+          text1: "Pronto",
+          text2: "Categoria removida com sucesso!",
+        });
+      } else {
+        showToast({
+          type: "error",
+          text1: "Ops",
+          text2: "Ocorreu um erro ao remover a categoria.",
+        });
+      }
+    } catch (error) {
+      showToast({
+        type: "error",
+        text1: "Ops",
+        text2: "Ocorreu um erro ao remover a categoria.",
+      });
+    }
+  };
+
+  useEffect(() => {
+    try {
+      const categoriasDb = getCategories();
+      const listasDb = getLists();
+
+      setCategorias(categoriasDb);
+      setListas(listasDb);
+    } catch (error) {
+      showToast({
+        type: "error",
+        text1: "Ops",
+        text2: "Ocorreu um erro ao carregar as categorias.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   return (
     <SafeAreaView
@@ -141,7 +170,11 @@ export default function Categorias() {
 
         <View style={styles.divider} />
 
-        {categorias.length === 0 ? (
+        {loading ? (
+          <View style={globalStyles.emptyContainer}>
+            <LoadingDots style={globalStyles.emptyText} />
+          </View>
+        ) : categorias.length === 0 ? (
           <View style={globalStyles.emptyContainer}>
             <View style={globalStyles.iconCircle}>
               <LayoutGrid size={32} color={colors.subtext} />
@@ -169,15 +202,21 @@ export default function Categorias() {
             keyboardDismissMode="on-drag"
             showsVerticalScrollIndicator={false}
           >
-            {categorias.map((categoria) => (
-              <CategoriaAccordion
-                key={categoria.id}
-                categoria={categoria}
-                listas={listas}
-                setListas={setListas}
-                openSwipeRef={openSwipeRef}
-              />
-            ))}
+            {categorias.map((categoria) => {
+              const listasDaCategoria = listas.filter(
+                (l) => l.category_id === categoria.id
+              );
+              return (
+                <CategoriaAccordion
+                  key={categoria.id}
+                  categoria={categoria}
+                  listas={listasDaCategoria}
+                  setListas={setListas}
+                  openSwipeRef={openSwipeRef}
+                  handleRemove={handleRemove}
+                />
+              );
+            })}
           </ScrollView>
         )}
       </View>

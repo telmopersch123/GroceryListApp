@@ -1,5 +1,5 @@
 import { X } from "lucide-react-native";
-import React, { useState } from "react";
+import React from "react";
 import {
   Modal,
   Pressable,
@@ -42,7 +42,6 @@ export const CategoryModal = ({
 }: Props) => {
   const globalStyles = useGlobalStyles();
   const { colors } = useSettings();
-  const [focused, setFocused] = useState(false);
   const styles = makeStyles(colors);
 
   return (
@@ -75,7 +74,6 @@ export const CategoryModal = ({
               style={[
                 globalStyles.input,
                 {
-                  borderWidth: focused ? 0 : 1,
                   borderColor: "rgba(128,128,128,0.2)",
                 },
                 error && globalStyles.inputError,

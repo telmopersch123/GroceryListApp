@@ -91,7 +91,7 @@ export default function EditarLista() {
     showToast({
       type: "success",
       text1: "Pronto",
-      text2: "A sua lista foi criada com sucesso!",
+      text2: "A sua lista foi editada com sucesso!",
     });
   }
 

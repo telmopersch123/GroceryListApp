@@ -22,6 +22,7 @@ interface PropsCardList {
   openSwipeRef: RefObject<SwipeableRef | null>;
   index: number;
   flag?: string;
+  typeCopy?: string;
 }
 
 export default function CardList({
@@ -30,6 +31,7 @@ export default function CardList({
   openSwipeRef,
   index,
   flag,
+  typeCopy,
 }: PropsCardList) {
   const { animationsEnabled, colors } = useSettings();
   const globalStyles = useGlobalStyles();
@@ -54,7 +56,8 @@ export default function CardList({
         lista.name,
         lista.category_id,
         lista.itens,
-        "copy"
+        "copy",
+        typeCopy
       );
       setListas((prev) => [...prev, novaLista]);
     } catch (error) {
@@ -86,7 +89,14 @@ export default function CardList({
         renderRightActions={(
           prog: SharedValue<number>,
           drag: SharedValue<number>
-        ) => <RightAction prog={prog} drag={drag} onRemover={onRemover} />}
+        ) => (
+          <RightAction
+            prog={prog}
+            drag={drag}
+            onRemover={onRemover}
+            categoriaId={lista.category_id ?? null}
+          />
+        )}
         onSwipeableWillOpen={() => setIsSwiping(true)}
         onSwipeableClose={() => setIsSwiping(false)}
         onSwipeableWillClose={() => setIsSwiping(false)}
@@ -120,23 +130,24 @@ export default function CardList({
             </Text>
 
             <View style={globalStyles.iconContainer}>
-              <Pressable
-                style={({ pressed }) => [
-                  globalStyles.iconButton,
-                  pressed && { transform: [{ scale: 0.9 }] },
-                ]}
-                onPress={() => {
-                  CopyList(lista, setListas);
-                }}
-              >
-                {({ pressed }) => (
-                  <Copy
-                    size={18}
-                    color={pressed ? colors.primary : colors.iconColor}
-                  />
-                )}
-              </Pressable>
-
+              {flag !== "category" && (
+                <Pressable
+                  style={({ pressed }) => [
+                    globalStyles.iconButton,
+                    pressed && { transform: [{ scale: 0.9 }] },
+                  ]}
+                  onPress={() => {
+                    CopyList(lista, setListas);
+                  }}
+                >
+                  {({ pressed }) => (
+                    <Copy
+                      size={18}
+                      color={pressed ? colors.primary : colors.iconColor}
+                    />
+                  )}
+                </Pressable>
+              )}
               <Pressable
                 onPress={() => FavoritedList(lista, setListas, flag)}
                 style={({ pressed }) => [

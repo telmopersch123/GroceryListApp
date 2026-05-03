@@ -10,10 +10,12 @@ export function RightAction({
   prog,
   drag,
   onRemover,
+  categoriaId,
 }: {
   prog: SharedValue<number>;
   drag: SharedValue<number>;
-  onRemover: () => void;
+  onRemover: (id: number | null) => void;
+  categoriaId: number | null;
 }) {
   const animStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: drag.value + 80 }],
@@ -30,7 +32,7 @@ export function RightAction({
       ]}
     >
       <Pressable
-        onPress={onRemover}
+        onPress={() => onRemover(categoriaId || null)}
         style={{
           backgroundColor: "#D32F2F",
           justifyContent: "center",

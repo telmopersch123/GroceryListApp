@@ -3,7 +3,10 @@ import {
   getItemsByListId,
   toggleItem as toggleItemDb,
 } from "@/app/database/listItemsRepository";
-import { getListById } from "@/app/database/listsRepository";
+import {
+  getListById,
+  updateListCategory,
+} from "@/app/database/listsRepository";
 import { ICONES } from "@/components/categorias/categoriaAccordion";
 import { useGlobalStyles } from "@/constants/globalStyles";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -92,9 +95,10 @@ export default function ListaAberta() {
       <View style={styles.header}>
         <Pressable
           onPress={() => {
-            console.log(from);
             if (from === "favorites") {
               router.replace("/(tabs)/favoritos");
+            } else if (from === "category") {
+              router.replace("/(tabs)/categorias");
             } else {
               router.push("/");
             }
@@ -220,49 +224,101 @@ export default function ListaAberta() {
             </View>
 
             <ScrollView contentContainerStyle={{ gap: 12 }}>
-              {categorias.map((categoria) => {
-                const Icone = ICONES[parseInt(categoria.icon)];
-                const selecionado = categoriaSelecionada === categoria.id;
+              {categorias.length > 0 ? (
+                <>
+                  {categorias.map((categoria) => {
+                    const Icone = ICONES[categoria.icon];
+                    const selecionado = categoriaSelecionada === categoria.id;
 
-                return (
-                  <Pressable
-                    key={categoria.id}
+                    return (
+                      <Pressable
+                        key={categoria.id}
+                        style={[
+                          styles.categoriaItem,
+                          selecionado && styles.categoriaItemSelecionado,
+                        ]}
+                        onPress={() => {
+                          if (lista) {
+                            updateListCategory(
+                              lista.id,
+                              selecionado ? null : categoria.id
+                            );
+                          }
+                          setCategoriaSelecionada(
+                            selecionado ? null : categoria.id
+                          );
+                          setModalCategorias(false);
+                        }}
+                      >
+                        <View
+                          style={[
+                            styles.categoriaIcone,
+                            selecionado && styles.categoriaIconeSelecionado,
+                          ]}
+                        >
+                          <Icone
+                            size={20}
+                            color={selecionado ? "#fff" : colors.primary}
+                          />
+                        </View>
+
+                        <Text
+                          style={[
+                            styles.categoriaNome,
+                            selecionado && { color: colors.primary },
+                          ]}
+                        >
+                          {categoria.nome}
+                        </Text>
+
+                        {selecionado && (
+                          <Check size={18} color={colors.primary} />
+                        )}
+                      </Pressable>
+                    );
+                  })}
+                </>
+              ) : (
+                <>
+                  <View
                     style={[
-                      styles.categoriaItem,
-                      selecionado && styles.categoriaItemSelecionado,
+                      {
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginTop: 50,
+                        marginBottom: 50,
+                      },
                     ]}
-                    onPress={() => {
-                      setCategoriaSelecionada(
-                        selecionado ? null : categoria.id
-                      );
-                      setModalCategorias(false);
-                    }}
                   >
-                    <View
-                      style={[
-                        styles.categoriaIcone,
-                        selecionado && styles.categoriaIconeSelecionado,
-                      ]}
-                    >
-                      <Icone
-                        size={20}
-                        color={selecionado ? "#fff" : colors.primary}
-                      />
-                    </View>
-
                     <Text
-                      style={[
-                        styles.categoriaNome,
-                        selecionado && { color: colors.primary },
-                      ]}
+                      style={{
+                        color: colors.subtext,
+                        fontSize: 14,
+                        textAlign: "center",
+                      }}
                     >
-                      {categoria.nome}
+                      Nenhuma categoria disponível. Crie categorias para
+                      organizar suas listas!
                     </Text>
-
-                    {selecionado && <Check size={18} color={colors.primary} />}
-                  </Pressable>
-                );
-              })}
+                    <Pressable
+                      style={({ pressed }) => [
+                        globalStyles.actionButton,
+                        pressed && globalStyles.actionButtonPressed,
+                        {
+                          marginTop: 20,
+                          backgroundColor: colors.primary,
+                        },
+                      ]}
+                      onPress={() => {
+                        router.replace("/(tabs)/categorias");
+                        setModalCategorias(false);
+                      }}
+                    >
+                      <Text style={styles.actionText}>Criar categoria</Text>
+                    </Pressable>
+                  </View>
+                </>
+              )}
             </ScrollView>
           </View>
         </View>
