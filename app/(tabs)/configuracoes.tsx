@@ -3,7 +3,7 @@ import { useGlobalStyles } from "@/constants/globalStyles";
 import { Moon, Sparkles } from "lucide-react-native";
 import React from "react";
 import { StyleSheet, Switch, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSettings } from "../context/SettingsContext";
 type ColorScheme = typeof Colors.light;
 export default function Configurações() {
@@ -18,8 +18,14 @@ export default function Configurações() {
 
   const globalStyles = useGlobalStyles();
   const styles = makeStyles(colors);
+  const insets = useSafeAreaInsets();
   return (
-    <SafeAreaView style={globalStyles.safe}>
+    <View
+      style={[
+        globalStyles.safe,
+        { paddingTop: insets.top, paddingBottom: insets.bottom },
+      ]}
+    >
       <View style={[globalStyles.container, styles.pagePadding]}>
         <Text style={globalStyles.title}>Configurações</Text>
         <Text style={globalStyles.subtitle}>Preferências de exibição</Text>
@@ -82,7 +88,7 @@ export default function Configurações() {
           </View>
         </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 

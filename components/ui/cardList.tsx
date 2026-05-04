@@ -6,7 +6,7 @@ import { SwipeableRef } from "@/app/utils/functionsSwipe";
 import { useGlobalStyles } from "@/constants/globalStyles";
 import { router } from "expo-router";
 import { Copy, Star } from "lucide-react-native";
-import { RefObject, useRef, useState } from "react";
+import { memo, RefObject, useRef, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import Animated, {
@@ -25,7 +25,7 @@ interface PropsCardList {
   typeCopy?: string;
 }
 
-export default function CardList({
+function CardList({
   lista,
   setListas,
   openSwipeRef,
@@ -68,8 +68,8 @@ export default function CardList({
     <Animated.View
       entering={
         animationsEnabled
-          ? FadeInDown.delay(index * 100)
-              .duration(600)
+          ? FadeInDown.delay(index * 30)
+              .duration(200)
               .springify()
           : undefined
       }
@@ -205,3 +205,12 @@ export default function CardList({
     </Animated.View>
   );
 }
+export default memo(CardList, (prev, next) => {
+  return (
+    prev.lista.id === next.lista.id &&
+    prev.lista.name === next.lista.name &&
+    prev.lista.favorited === next.lista.favorited &&
+    prev.lista.itens.length === next.lista.itens.length &&
+    prev.lista.category_id === next.lista.category_id
+  );
+});

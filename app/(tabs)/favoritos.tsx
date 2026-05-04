@@ -3,30 +3,33 @@ import CardList from "@/components/ui/cardList";
 import { useGlobalStyles } from "@/constants/globalStyles";
 import { useIsFocused } from "@react-navigation/native";
 import { Heart } from "lucide-react-native";
-import { useEffect, useRef, useState } from "react";
-import { ScrollView, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useEffect, useRef } from "react";
+import { FlatList, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useLists } from "../context/ListsContext";
 import { useSettings } from "../context/SettingsContext";
-import { getFavoriteLists } from "../database/listsRepository";
-import { TypeListRenderHome } from "../types/typesGlobal";
 import { closeAllSwipes, SwipeableRef } from "../utils/functionsSwipe";
 export default function Favorites() {
   const { colors } = useSettings();
+  const { listas, setListas, carregarListas } = useLists();
   const globalStyles = useGlobalStyles();
   const isFocused = useIsFocused();
   const openSwipeRef = useRef<SwipeableRef | null>(null);
-  const [listas, setListas] = useState<TypeListRenderHome[]>([]);
-
+  const insets = useSafeAreaInsets();
+  const carregouRef = useRef(false);
   useEffect(() => {
-    if (isFocused) {
-      const listasDb = getFavoriteLists();
-      setListas(listasDb);
+    if (isFocused && !carregouRef.current) {
+      carregarListas();
+      carregouRef.current = true;
     }
   }, [isFocused]);
-
+  const listasFavoritas = listas.filter((l) => l.favorited);
   return (
-    <SafeAreaView
-      style={globalStyles.safe}
+    <View
+      style={[
+        globalStyles.safe,
+        { paddingTop: insets.top, paddingBottom: insets.bottom },
+      ]}
       onStartShouldSetResponderCapture={() => {
         closeAllSwipes(openSwipeRef);
         return false;
@@ -43,7 +46,7 @@ export default function Favorites() {
             marginHorizontal: -20,
           }}
         />
-        {listas.length === 0 ? (
+        {listasFavoritas.length === 0 ? (
           <View style={globalStyles.emptyContainer}>
             <View style={globalStyles.iconCircle}>
               <Heart size={32} color="#424242" />
@@ -59,22 +62,29 @@ export default function Favorites() {
             style={{ marginTop: 20, flex: 1, overflow: "hidden" }}
             key={isFocused ? "focused" : "unfocused"}
           >
-            <ScrollView>
-              {listas.map((lista, index) => (
+            <FlatList
+              data={listasFavoritas}
+              showsVerticalScrollIndicator={false}
+              removeClippedSubviews={false}
+              windowSize={5}
+              initialNumToRender={10}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item, index }) => (
                 <CardList
-                  key={lista.id}
-                  lista={lista}
+                  key={item.id}
+                  lista={item}
                   setListas={setListas}
                   openSwipeRef={openSwipeRef}
                   index={index}
                   flag="favorites"
                   typeCopy="favorites"
                 />
-              ))}
-            </ScrollView>
+              )}
+              style={{ flex: 1 }}
+            />
           </View>
         )}
       </View>
-    </SafeAreaView>
+    </View>
   );
 }

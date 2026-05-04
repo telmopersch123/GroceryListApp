@@ -23,6 +23,7 @@ export default function TabLayout() {
       <Tabs
         screenOptions={{
           headerShown: false,
+          lazy: false,
           tabBarActiveTintColor: colors.primary,
           tabBarActiveBackgroundColor: colors.background,
           tabBarInactiveBackgroundColor: colors.background,
@@ -35,11 +36,6 @@ export default function TabLayout() {
             bottom: 0,
             backgroundColor: colors.background,
             borderTopColor: colors.border,
-            // height: 60,
-            // marginTop: -55,
-            // backgroundColor: colors.background,
-            // borderTopColor: colors.border,
-            // position: "relative",
           },
         }}
       >
@@ -48,11 +44,7 @@ export default function TabLayout() {
           options={{
             title: "Início",
             tabBarIcon: ({ color, focused }) => (
-              <ShoppingBasket
-                size={24}
-                color={color}
-                // fill={focused ? color : "transparent"}
-              />
+              <ShoppingBasket size={24} color={color} />
             ),
           }}
         />
@@ -90,11 +82,7 @@ export default function TabLayout() {
           options={{
             title: "Configurações",
             tabBarIcon: ({ color, focused }) => (
-              <Settings
-                size={24}
-                color={color}
-                // fill={focused ? color : "transparent"}
-              />
+              <Settings size={24} color={color} />
             ),
           }}
         />

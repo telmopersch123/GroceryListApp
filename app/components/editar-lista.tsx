@@ -51,10 +51,8 @@ export default function EditarLista() {
         setLista(listaDb);
         setItensList(getItemsByListId(id));
         setNomeLista(listaDb.name);
-        // setCategoriaSelecionada(listaDb.category_id);
       }
     }
-    // setCategorias(getCategories());
   }, [params.id]);
 
   function handleSalvar() {

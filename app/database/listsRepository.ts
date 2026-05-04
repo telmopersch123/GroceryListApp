@@ -1,6 +1,6 @@
 import { TypeItens, TypeListRenderHome } from "../types/typesGlobal";
 import db from "./db";
-import { createItem, getItemsByListId } from "./listItemsRepository";
+import { createItem } from "./listItemsRepository";
 
 export function createList(
   name: string,
@@ -38,22 +38,48 @@ export function createList(
 }
 
 export function getLists(): TypeListRenderHome[] {
-  const lists = db.getAllSync<{
+  const rows = db.getAllSync<{
     id: number;
     name: string;
     category_id: number | null;
     is_favorite: number;
     created_at: string;
-  }>("SELECT * FROM lists ORDER BY created_at DESC");
+    item_id: number | null;
+    item_name: string | null;
+    is_checked: number | null;
+  }>(`SELECT 
+        l.id, l.name, l.category_id, l.is_favorite, l.created_at,
+        li.id as item_id, li.name as item_name, li.is_checked
+      FROM lists l
+      LEFT JOIN list_items li ON li.list_id = l.id
+      ORDER BY created_at DESC, li.id ASC
+      `);
 
-  return lists.map((row) => ({
-    id: row.id,
-    name: row.name,
-    category_id: row.category_id,
-    itens: getItemsByListId(row.id),
-    favorited: row.is_favorite === 1,
-    created_at: row.created_at,
-  }));
+  const listsMap = new Map<number, TypeListRenderHome>();
+
+  for (const row of rows) {
+    if (!listsMap.has(row.id)) {
+      listsMap.set(row.id, {
+        id: row.id,
+        name: row.name,
+        category_id: row.category_id,
+        favorited: row.is_favorite === 1,
+        created_at: row.created_at,
+        itens: [],
+      });
+    }
+
+    if (row.item_id !== null && row.item_name !== null) {
+      listsMap.get(row.id)!.itens.push({
+        id: row.item_id,
+        name: row.item_name,
+        checked: row.is_checked === 1,
+        list_id: row.id,
+      });
+    }
+  }
+
+  return Array.from(listsMap.values());
 }
 
 export function getListById(id: number): TypeListRenderHome | null {
@@ -124,42 +150,42 @@ export function deleteList(id: number): void {
   db.runSync("DELETE FROM lists WHERE id = ?", [id]);
 }
 
-export function getFavoriteLists(): TypeListRenderHome[] {
-  const lists = db.getAllSync<{
-    id: number;
-    name: string;
-    category_id: number | null;
-    is_favorite: number;
-    created_at: string;
-  }>("SELECT * FROM lists WHERE is_favorite = 1 ORDER BY created_at DESC");
+// export function getFavoriteLists(): TypeListRenderHome[] {
+//   const lists = db.getAllSync<{
+//     id: number;
+//     name: string;
+//     category_id: number | null;
+//     is_favorite: number;
+//     created_at: string;
+//   }>("SELECT * FROM lists WHERE is_favorite = 1 ORDER BY created_at DESC");
 
-  return lists.map((row) => ({
-    id: row.id,
-    name: row.name,
-    category_id: row.category_id,
-    itens: getItemsByListId(row.id),
-    favorited: row.is_favorite === 1,
-    created_at: row.created_at,
-  }));
-}
+//   return lists.map((row) => ({
+//     id: row.id,
+//     name: row.name,
+//     category_id: row.category_id,
+//     itens: getItemsByListId(row.id),
+//     favorited: row.is_favorite === 1,
+//     created_at: row.created_at,
+//   }));
+// }
 
-export function getListsByCategory(category_id: number): TypeListRenderHome[] {
-  const lists = db.getAllSync<{
-    id: number;
-    name: string;
-    category_id: number | null;
-    is_favorite: number;
-    created_at: string;
-  }>("SELECT * FROM lists WHERE category_id = ? ORDER BY created_at DESC", [
-    category_id,
-  ]);
+// export function getListsByCategory(category_id: number): TypeListRenderHome[] {
+//   const lists = db.getAllSync<{
+//     id: number;
+//     name: string;
+//     category_id: number | null;
+//     is_favorite: number;
+//     created_at: string;
+//   }>("SELECT * FROM lists WHERE category_id = ? ORDER BY created_at DESC", [
+//     category_id,
+//   ]);
 
-  return lists.map((row) => ({
-    id: row.id,
-    name: row.name,
-    category_id: row.category_id,
-    itens: [],
-    favorited: row.is_favorite === 1,
-    created_at: row.created_at,
-  }));
-}
+//   return lists.map((row) => ({
+//     id: row.id,
+//     name: row.name,
+//     category_id: row.category_id,
+//     itens: [],
+//     favorited: row.is_favorite === 1,
+//     created_at: row.created_at,
+//   }));
+// }

@@ -7,6 +7,7 @@ import { View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SettingsProvider, useSettings } from "./context/SettingsContext";
 
+import { ListsProvider } from "./context/ListsContext";
 import { useToast } from "./hooks/useToast";
 
 function AppContent() {
@@ -44,9 +45,11 @@ function AppContent() {
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <SettingsProvider>
-        <AppContent />
-      </SettingsProvider>
+      <ListsProvider>
+        <SettingsProvider>
+          <AppContent />
+        </SettingsProvider>
+      </ListsProvider>
     </GestureHandlerRootView>
   );
 }

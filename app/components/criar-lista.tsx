@@ -19,7 +19,8 @@ import Animated, {
   LinearTransition,
 } from "react-native-reanimated";
 
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useLists } from "../context/ListsContext";
 import { useSettings } from "../context/SettingsContext";
 import { createItem } from "../database/listItemsRepository";
 import { createList } from "../database/listsRepository";
@@ -28,8 +29,9 @@ import { showToast } from "../hooks/useToast";
 export default function CriarLista() {
   const { colors, animationsEnabled } = useSettings();
   const globalStyles = useGlobalStyles();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
-
+  const { setListas } = useLists();
   const [nomeLista, setNomeLista] = useState("");
   const [item, setItem] = useState("");
   const [erroNome, setErroNome] = useState("");
@@ -67,7 +69,16 @@ export default function CriarLista() {
     ItensList.forEach((item) => {
       createItem(novaLista.id, item.name);
     });
-
+    const listaComItens = {
+      ...novaLista,
+      itens: ItensList.map((item, i) => ({
+        id: i,
+        list_id: novaLista.id,
+        name: item.name,
+        checked: false,
+      })),
+    };
+    setListas((prev) => [listaComItens, ...prev]);
     router.back();
 
     showToast({
@@ -97,7 +108,12 @@ export default function CriarLista() {
   }
 
   return (
-    <SafeAreaView style={globalStyles.safe}>
+    <View
+      style={[
+        globalStyles.safe,
+        { paddingTop: insets.top, paddingBottom: insets.bottom },
+      ]}
+    >
       <View style={globalStyles.containerRow}>
         <Pressable onPress={() => router.back()}>
           <ArrowLeft size={24} color={colors.text} />
@@ -197,7 +213,7 @@ export default function CriarLista() {
           <Text style={globalStyles.saveText}>Criar</Text>
         </Pressable>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 

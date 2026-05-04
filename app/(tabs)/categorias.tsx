@@ -6,23 +6,23 @@ import { useGlobalStyles } from "@/constants/globalStyles";
 import { LayoutGrid, Plus } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
 import {
+  FlatList,
   Keyboard,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useLists } from "../context/ListsContext";
 import { useSettings } from "../context/SettingsContext";
 import {
   createCategory,
   deleteCategory,
   getCategories,
 } from "../database/categoriesRepository";
-import { getLists } from "../database/listsRepository";
 import { showToast } from "../hooks/useToast";
-import { Categoria, TypeListRenderHome } from "../types/typesGlobal";
+import { Categoria } from "../types/typesGlobal";
 import { closeAllSwipes, SwipeableRef } from "../utils/functionsSwipe";
 
 function actionsheet({
@@ -44,9 +44,10 @@ function actionsheet({
 
 export default function Categorias() {
   const { colors } = useSettings();
+  const { listas, setListas, carregarListas, listasCarregadas } = useLists();
   const globalStyles = useGlobalStyles();
   const styles = makeStyles(colors);
-
+  const insets = useSafeAreaInsets();
   const openSwipeRef = useRef<SwipeableRef | null>(null);
   const [loading, setLoading] = useState(true);
   const [modalVisivel, setModalVisivel] = useState(false);
@@ -54,8 +55,6 @@ export default function Categorias() {
   const [iconeSelecionado, setIconeSelecionado] = useState(0);
   const [error, setError] = useState("");
   const [categorias, setCategorias] = useState<Categoria[]>([]);
-
-  const [listas, setListas] = useState<TypeListRenderHome[]>([]);
 
   const handleCreateCategory = () => {
     if (!nomeCategoria.trim()) {
@@ -123,10 +122,11 @@ export default function Categorias() {
   useEffect(() => {
     try {
       const categoriasDb = getCategories();
-      const listasDb = getLists();
 
       setCategorias(categoriasDb);
-      setListas(listasDb);
+      if (!listasCarregadas) {
+        carregarListas();
+      }
     } catch (error) {
       showToast({
         type: "error",
@@ -139,8 +139,11 @@ export default function Categorias() {
   }, []);
 
   return (
-    <SafeAreaView
-      style={globalStyles.safe}
+    <View
+      style={[
+        globalStyles.safe,
+        { paddingTop: insets.top, paddingBottom: insets.bottom },
+      ]}
       onStartShouldSetResponderCapture={() => {
         closeAllSwipes(openSwipeRef);
         Keyboard.dismiss();
@@ -197,18 +200,21 @@ export default function Categorias() {
             </Pressable>
           </View>
         ) : (
-          <ScrollView
+          <FlatList
+            data={categorias}
+            keyExtractor={(item) => item.id.toString()}
             contentContainerStyle={styles.listContainer}
             keyboardDismissMode="on-drag"
             showsVerticalScrollIndicator={false}
-          >
-            {categorias.map((categoria) => {
+            removeClippedSubviews={false}
+            windowSize={5}
+            initialNumToRender={10}
+            renderItem={({ item: categoria }) => {
               const listasDaCategoria = listas.filter(
                 (l) => l.category_id === categoria.id
               );
               return (
                 <CategoriaAccordion
-                  key={categoria.id}
                   categoria={categoria}
                   listas={listasDaCategoria}
                   setListas={setListas}
@@ -216,8 +222,8 @@ export default function Categorias() {
                   handleRemove={handleRemove}
                 />
               );
-            })}
-          </ScrollView>
+            }}
+          />
         )}
       </View>
 
@@ -232,7 +238,7 @@ export default function Categorias() {
         handleCreateCategory={handleCreateCategory}
         setError={setError}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 

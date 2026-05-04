@@ -4,35 +4,39 @@ import { useGlobalStyles } from "@/constants/globalStyles";
 import { useIsFocused } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { Plus, ShoppingCart } from "lucide-react-native";
-import { useEffect, useRef, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { useEffect, useRef } from "react";
+import { FlatList, Pressable, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useLists } from "../context/ListsContext";
 import { useSettings } from "../context/SettingsContext";
-import { getLists } from "../database/listsRepository";
-import { TypeListRenderHome } from "../types/typesGlobal";
 import { closeAllSwipes, SwipeableRef } from "../utils/functionsSwipe";
 export default function Home() {
+  const { listas, setListas, carregarListas } = useLists();
   const insets = useSafeAreaInsets();
   const { colors } = useSettings();
   const globalStyles = useGlobalStyles();
   const isFocused = useIsFocused();
   const router = useRouter();
-  const [listas, setListas] = useState<TypeListRenderHome[]>([]);
+  const carregouRef = useRef(false);
   const openSwipeRef = useRef<SwipeableRef | null>(null);
 
   useEffect(() => {
-    if (isFocused) {
-      const listasDb = getLists();
-      setListas(listasDb);
+    if (isFocused && !carregouRef.current) {
+      carregarListas();
+      carregouRef.current = true;
     }
   }, [isFocused]);
 
   return (
-    <SafeAreaView
-      style={[globalStyles.safe, { backgroundColor: colors.background }]}
+    <View
+      style={[
+        globalStyles.safe,
+        {
+          backgroundColor: colors.background,
+          paddingTop: insets.top,
+          paddingBottom: insets.bottom,
+        },
+      ]}
       onStartShouldSetResponderCapture={() => {
         closeAllSwipes(openSwipeRef);
         return false;
@@ -65,23 +69,28 @@ export default function Home() {
             style={{ marginTop: 20, flex: 1, overflow: "hidden" }}
             key={isFocused ? "focused" : "unfocused"}
           >
-            <ScrollView showsVerticalScrollIndicator={false}>
-              {listas.map((lista, index) => (
+            <FlatList
+              data={listas}
+              keyExtractor={(item) => item.id.toString()}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: 20 }}
+              renderItem={({ item, index }) => (
                 <CardList
-                  key={lista.id}
-                  lista={lista}
+                  lista={item}
                   setListas={setListas}
                   openSwipeRef={openSwipeRef}
                   index={index}
                 />
-              ))}
-            </ScrollView>
+              )}
+            />
           </View>
         )}
       </View>
 
       <Pressable
-        onPress={() => router.push("/components/criar-lista")}
+        onPress={() => {
+          router.push("/components/criar-lista");
+        }}
         style={({ pressed }) => [
           globalStyles.floatingButton,
           {
@@ -92,6 +101,6 @@ export default function Home() {
       >
         <Plus size={32} color="#fff" />
       </Pressable>
-    </SafeAreaView>
+    </View>
   );
 }

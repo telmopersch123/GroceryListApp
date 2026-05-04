@@ -21,7 +21,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getCategories } from "../database/categoriesRepository";
 import { Categoria, TypeItens, TypeListRenderHome } from "../types/typesGlobal";
 import { FavoritedSingleList } from "../utils/functionFavorited";
@@ -30,18 +30,24 @@ export default function ListaAberta() {
   const globalStyles = useGlobalStyles();
   const { colors } = useSettings();
   const styles = makeStyles(colors);
-
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const params = useLocalSearchParams();
   const progressAnim = useRef(new Animated.Value(0)).current;
+  const id = Number(params.id);
 
-  const [modalCategorias, setModalCategorias] = useState(false);
+  const [lista, setLista] = useState<TypeListRenderHome | undefined>(
+    () => getListById(id) ?? undefined
+  );
+  const [itens, setItens] = useState<TypeItens[]>(() => getItemsByListId(id));
+  const [categorias, setCategorias] = useState<Categoria[]>(() =>
+    getCategories()
+  );
   const [categoriaSelecionada, setCategoriaSelecionada] = useState<
     number | null
-  >(null);
-  const [itens, setItens] = useState<TypeItens[]>([]);
-  const [lista, setLista] = useState<TypeListRenderHome>();
-  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  >(() => getListById(id)?.category_id ?? null);
+  const [modalCategorias, setModalCategorias] = useState(false);
+
   const from = params.from;
   const total = itens.length;
   const concluidos = itens.filter((item) => item.checked).length;
@@ -60,21 +66,6 @@ export default function ListaAberta() {
     }).start();
   }, [porcentagem]);
 
-  useEffect(() => {
-    if (params.id) {
-      const id = Number(params.id);
-      const listaDb = getListById(id);
-
-      if (listaDb) {
-        setLista(listaDb);
-        setItens(getItemsByListId(id));
-        setCategoriaSelecionada(listaDb.category_id);
-      }
-    }
-
-    setCategorias(getCategories());
-  }, [params.id]);
-
   function toggleItem(id: number) {
     setItens((prev) =>
       prev.map((item) => {
@@ -90,17 +81,25 @@ export default function ListaAberta() {
   const categoriaAtual = categorias.find((c) => c.id === categoriaSelecionada);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View
+      style={[
+        styles.container,
+
+        { paddingTop: insets.top, paddingBottom: insets.bottom },
+      ]}
+    >
       {/* HEADER */}
       <View style={styles.header}>
         <Pressable
           onPress={() => {
             if (from === "favorites") {
+              router.dismissAll();
               router.replace("/(tabs)/favoritos");
             } else if (from === "category") {
+              router.dismissAll();
               router.replace("/(tabs)/categorias");
             } else {
-              router.push("/");
+              router.dismissAll();
             }
           }}
         >
@@ -323,7 +322,7 @@ export default function ListaAberta() {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -332,6 +331,7 @@ const makeStyles = (colors: any) =>
     container: {
       flex: 1,
       padding: 20,
+      marginTop: 20,
       backgroundColor: colors.background,
     },
     header: {
