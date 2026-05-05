@@ -1,18 +1,28 @@
 import { useSettings } from "@/app/context/SettingsContext";
-import { createList, deleteList } from "@/app/database/listsRepository";
+import {
+  createList,
+  deleteList,
+  LIMITE_LISTAS,
+} from "@/app/database/listsRepository";
+import { showToast } from "@/app/hooks/useToast";
 import { TypeListRenderHome } from "@/app/types/typesGlobal";
 import { FavoritedList } from "@/app/utils/functionFavorited";
 import { SwipeableRef } from "@/app/utils/functionsSwipe";
 import { useGlobalStyles } from "@/constants/globalStyles";
+import { useIsFocused } from "@react-navigation/native";
 import { router } from "expo-router";
 import { Copy, Star } from "lucide-react-native";
-import { memo, RefObject, useRef, useState } from "react";
+import { memo, RefObject, useEffect, useRef } from "react";
 import { Pressable, Text, View } from "react-native";
 import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import Animated, {
-  FadeInDown,
+  Easing,
   LinearTransition,
   SharedValue,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withTiming,
 } from "react-native-reanimated";
 import { RightAction } from "./RightAction";
 
@@ -36,11 +46,31 @@ function CardList({
   const { animationsEnabled, colors } = useSettings();
   const globalStyles = useGlobalStyles();
   const swipeableRef = useRef<SwipeableRef | null>(null);
-  const [isSwiping, setIsSwiping] = useState(false);
+  const isSwiping = useRef(false);
+  const isFocused = useIsFocused();
 
   const total = lista.itens.length;
   const concluidos = lista.itens.filter((item) => item.checked).length;
   const porcentagem = total === 0 ? 0 : Math.round((concluidos / total) * 100);
+  const opacity = useSharedValue(animationsEnabled ? 0 : 1);
+  const translateY = useSharedValue(animationsEnabled ? 8 : 0);
+
+  useEffect(() => {
+    if (!animationsEnabled || !isFocused) return;
+
+    opacity.value = 0;
+    translateY.value = 14;
+
+    const config = { duration: 320, easing: Easing.out(Easing.cubic) };
+
+    opacity.value = withDelay(index * 40, withTiming(1, config));
+    translateY.value = withDelay(index * 40, withTiming(0, config));
+  }, [isFocused, animationsEnabled]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
 
   function onRemover() {
     deleteList(lista.id);
@@ -60,21 +90,22 @@ function CardList({
         typeCopy
       );
       setListas((prev) => [...prev, novaLista]);
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      if (error.message === "LIMITE_LISTAS") {
+        showToast({
+          type: "error",
+          text1: `Limite de ${LIMITE_LISTAS} listas atingido.`,
+        });
+      } else {
+        showToast({
+          type: "error",
+          text1: "Ocorreu um erro ao criar a lista.",
+        });
+      }
     }
   }
   return (
-    <Animated.View
-      entering={
-        animationsEnabled
-          ? FadeInDown.delay(index * 30)
-              .duration(200)
-              .springify()
-          : undefined
-      }
-      layout={LinearTransition}
-    >
+    <Animated.View style={animatedStyle} layout={LinearTransition}>
       <ReanimatedSwipeable
         ref={swipeableRef}
         onSwipeableOpen={() => {
@@ -97,15 +128,21 @@ function CardList({
             categoriaId={lista.category_id ?? null}
           />
         )}
-        onSwipeableWillOpen={() => setIsSwiping(true)}
-        onSwipeableClose={() => setIsSwiping(false)}
-        onSwipeableWillClose={() => setIsSwiping(false)}
+        onSwipeableWillOpen={() => {
+          isSwiping.current = true;
+        }}
+        onSwipeableClose={() => {
+          isSwiping.current = false;
+        }}
+        onSwipeableWillClose={() => {
+          isSwiping.current = false;
+        }}
         friction={1}
         overshootRight={false}
         rightThreshold={30}
       >
         <Pressable
-          disabled={isSwiping}
+          disabled={isSwiping.current}
           onPress={() =>
             router.push({
               pathname: "/components/lista-aberta",

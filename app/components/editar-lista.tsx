@@ -3,7 +3,7 @@ import { TrashButton } from "@/components/ui/trashButton";
 import { useGlobalStyles } from "@/constants/globalStyles";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowLeft, FileEdit, Plus } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Keyboard,
   LayoutAnimation,
@@ -20,7 +20,10 @@ import Animated, {
   LinearTransition,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { getItemsByListId } from "../database/listItemsRepository";
+import {
+  getItemsByListId,
+  LIMITE_ITENS,
+} from "../database/listItemsRepository";
 import { getListById, updateList } from "../database/listsRepository";
 import { showToast } from "../hooks/useToast";
 import { TypeItens, TypeListRenderHome } from "../types/typesGlobal";
@@ -30,11 +33,8 @@ export default function EditarLista() {
   const { colors, animationsEnabled } = useSettings();
 
   const [lista, setLista] = useState<TypeListRenderHome>();
-  // const [categorias, setCategorias] = useState<Categoria[]>([]);
-  // const [categoriaSelecionada, setCategoriaSelecionada] = useState<
-  //   number | null
-  // >(null);
-  const styles = makeStyles(colors);
+
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const router = useRouter();
   const params = useLocalSearchParams();
   const [erroNome, setErroNome] = useState("");
@@ -74,27 +74,46 @@ export default function EditarLista() {
 
     if (temErro) return;
 
-    updateList(
-      Number(params.id),
-      nomeLista.trim(),
-      lista?.category_id ?? null,
-      ItensList
-    );
+    try {
+      updateList(
+        Number(params.id),
+        nomeLista.trim(),
+        lista?.category_id ?? null,
+        ItensList
+      );
 
-    router.push({
-      pathname: "/components/lista-aberta",
-      params: { id: lista?.id, from: from },
-    });
+      router.push({
+        pathname: "/components/lista-aberta",
+        params: { id: lista?.id, from: from },
+      });
 
-    showToast({
-      type: "success",
-      text1: "Pronto",
-      text2: "A sua lista foi editada com sucesso!",
-    });
+      showToast({
+        type: "success",
+        text1: "Pronto",
+        text2: "A sua lista foi editada com sucesso!",
+      });
+    } catch (error: any) {
+      if (error.message === "LIMITE_ITENS") {
+        showToast({
+          type: "error",
+          text1: `Limite de ${LIMITE_ITENS} itens por lista atingido.`,
+        });
+      } else {
+        showToast({
+          type: "error",
+          text1: "Ocorreu um erro ao editar a lista.",
+        });
+      }
+    }
   }
 
   function handleAddItem() {
     if (!itemInput.trim()) return;
+
+    if (ItensList.length >= LIMITE_ITENS) {
+      setErroItem(`Limite de ${LIMITE_ITENS} itens por lista atingido.`);
+      return;
+    }
 
     const novoItem = {
       id: Date.now(),

@@ -1,7 +1,14 @@
 import { TypeItens } from "../types/typesGlobal";
 import db from "./db";
-
+export const LIMITE_ITENS = 100;
 export function createItem(list_id: number, name: string): TypeItens {
+  const count = db.getFirstSync<{ total: number }>(
+    "SELECT COUNT(*) as total FROM list_items WHERE list_id = ?"
+  );
+  if (count && count.total >= LIMITE_ITENS) {
+    throw new Error("LIMITE_ITENS");
+  }
+
   const result = db.runSync(
     "INSERT INTO list_items (list_id, name) VALUES (?, ?)",
     [list_id, name]

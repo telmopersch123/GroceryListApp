@@ -11,7 +11,7 @@ import { ICONES } from "@/components/categorias/categoriaAccordion";
 import { useGlobalStyles } from "@/constants/globalStyles";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowLeft, Check, Pencil, Star, Tag, X } from "lucide-react-native";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
   Modal,
@@ -29,7 +29,7 @@ import { FavoritedSingleList } from "../utils/functionFavorited";
 export default function ListaAberta() {
   const globalStyles = useGlobalStyles();
   const { colors } = useSettings();
-  const styles = makeStyles(colors);
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const params = useLocalSearchParams();

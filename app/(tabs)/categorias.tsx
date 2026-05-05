@@ -4,7 +4,7 @@ import { LoadingDots } from "@/components/ui/Loading";
 import { toastError, toastSuccess } from "@/components/ui/Toast";
 import { useGlobalStyles } from "@/constants/globalStyles";
 import { LayoutGrid, Plus } from "lucide-react-native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   FlatList,
   Keyboard,
@@ -46,7 +46,7 @@ export default function Categorias() {
   const { colors } = useSettings();
   const { listas, setListas, carregarListas, listasCarregadas } = useLists();
   const globalStyles = useGlobalStyles();
-  const styles = makeStyles(colors);
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
   const openSwipeRef = useRef<SwipeableRef | null>(null);
   const [loading, setLoading] = useState(true);
@@ -206,9 +206,10 @@ export default function Categorias() {
             contentContainerStyle={styles.listContainer}
             keyboardDismissMode="on-drag"
             showsVerticalScrollIndicator={false}
-            removeClippedSubviews={false}
             windowSize={5}
-            initialNumToRender={10}
+            initialNumToRender={8}
+            maxToRenderPerBatch={5}
+            removeClippedSubviews={true}
             renderItem={({ item: categoria }) => {
               const listasDaCategoria = listas.filter(
                 (l) => l.category_id === categoria.id

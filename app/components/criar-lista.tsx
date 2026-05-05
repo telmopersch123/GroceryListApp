@@ -22,8 +22,8 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLists } from "../context/ListsContext";
 import { useSettings } from "../context/SettingsContext";
-import { createItem } from "../database/listItemsRepository";
-import { createList } from "../database/listsRepository";
+import { createItem, LIMITE_ITENS } from "../database/listItemsRepository";
+import { createList, LIMITE_LISTAS } from "../database/listsRepository";
 import { showToast } from "../hooks/useToast";
 
 export default function CriarLista() {
@@ -63,29 +63,47 @@ export default function CriarLista() {
     }
 
     if (temErro) return;
+    try {
+      const novaLista = createList(nomeLista.trim());
 
-    const novaLista = createList(nomeLista.trim());
+      ItensList.forEach((item) => {
+        createItem(novaLista.id, item.name);
+      });
+      const listaComItens = {
+        ...novaLista,
+        itens: ItensList.map((item, i) => ({
+          id: i,
+          list_id: novaLista.id,
+          name: item.name,
+          checked: false,
+        })),
+      };
+      setListas((prev) => [listaComItens, ...prev]);
+      router.back();
 
-    ItensList.forEach((item) => {
-      createItem(novaLista.id, item.name);
-    });
-    const listaComItens = {
-      ...novaLista,
-      itens: ItensList.map((item, i) => ({
-        id: i,
-        list_id: novaLista.id,
-        name: item.name,
-        checked: false,
-      })),
-    };
-    setListas((prev) => [listaComItens, ...prev]);
-    router.back();
-
-    showToast({
-      type: "success",
-      text1: "Pronto",
-      text2: "A sua lista foi criada com sucesso!",
-    });
+      showToast({
+        type: "success",
+        text1: "Pronto",
+        text2: "A sua lista foi criada com sucesso!",
+      });
+    } catch (error: any) {
+      if (error.message === "LIMITE_LISTAS") {
+        showToast({
+          type: "error",
+          text1: `Limite de ${LIMITE_LISTAS} listas atingido.`,
+        });
+      } else if (error.message === "LIMITE_ITENS") {
+        showToast({
+          type: "error",
+          text1: `Limite de ${LIMITE_ITENS} itens por lista atingido.`,
+        });
+      } else {
+        showToast({
+          type: "error",
+          text1: "Ocorreu um erro ao criar a lista.",
+        });
+      }
+    }
   }
 
   function handleRemover(id: number) {
@@ -95,6 +113,10 @@ export default function CriarLista() {
   function handleAddItem() {
     if (!item.trim()) return;
 
+    if (ItensList.length >= LIMITE_ITENS) {
+      setErroItem(`Limite de ${LIMITE_ITENS} itens por lista atingido.`);
+      return;
+    }
     const novoItem = {
       id: Date.now(),
       name: item,

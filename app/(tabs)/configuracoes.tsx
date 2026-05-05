@@ -1,7 +1,7 @@
 import Colors from "@/constants/Colors";
 import { useGlobalStyles } from "@/constants/globalStyles";
 import { Moon, Sparkles } from "lucide-react-native";
-import React from "react";
+import React, { useMemo } from "react";
 import { StyleSheet, Switch, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSettings } from "../context/SettingsContext";
@@ -13,11 +13,10 @@ export default function Configurações() {
     isDark,
     toggleTheme,
     colors,
-    themeAnim,
   } = useSettings();
 
   const globalStyles = useGlobalStyles();
-  const styles = makeStyles(colors);
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
   return (
     <View

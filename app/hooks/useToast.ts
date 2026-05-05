@@ -22,9 +22,11 @@ export function useToast() {
     text1: "",
     id: 0,
   });
-
   const show = (data: ToastData) => {
-    setToast({ ...data, visible: true, id: Date.now() });
+    setToast((prev) => ({ ...prev, visible: false }));
+    setTimeout(() => {
+      setToast({ ...data, visible: true, id: Date.now() });
+    }, 150);
   };
 
   const hide = () => {

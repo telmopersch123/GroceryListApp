@@ -58,17 +58,15 @@ export default function Favorites() {
             </Text>
           </View>
         ) : (
-          <View
-            style={{ marginTop: 20, flex: 1, overflow: "hidden" }}
-            key={isFocused ? "focused" : "unfocused"}
-          >
+          <View style={{ marginTop: 20, flex: 1, overflow: "hidden" }}>
             <FlatList
               data={listasFavoritas}
               showsVerticalScrollIndicator={false}
-              removeClippedSubviews={false}
               windowSize={5}
-              initialNumToRender={10}
+              initialNumToRender={8}
               keyExtractor={(item) => item.id.toString()}
+              maxToRenderPerBatch={5}
+              removeClippedSubviews={true}
               renderItem={({ item, index }) => (
                 <CardList
                   key={item.id}

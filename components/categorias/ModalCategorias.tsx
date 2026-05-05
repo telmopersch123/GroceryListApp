@@ -1,5 +1,5 @@
 import { X } from "lucide-react-native";
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Modal,
   Pressable,
@@ -42,7 +42,7 @@ export const CategoryModal = ({
 }: Props) => {
   const globalStyles = useGlobalStyles();
   const { colors } = useSettings();
-  const styles = makeStyles(colors);
+  const styles = useMemo(() => makeStyles(colors), [colors]);
 
   return (
     <Modal

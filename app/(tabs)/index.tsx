@@ -6,12 +6,15 @@ import { useRouter } from "expo-router";
 import { Plus, ShoppingCart } from "lucide-react-native";
 import { useEffect, useRef } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
+import Animated, { FadeIn } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLists } from "../context/ListsContext";
 import { useSettings } from "../context/SettingsContext";
 import { closeAllSwipes, SwipeableRef } from "../utils/functionsSwipe";
+
 export default function Home() {
   const { listas, setListas, carregarListas } = useLists();
+
   const insets = useSafeAreaInsets();
   const { colors } = useSettings();
   const globalStyles = useGlobalStyles();
@@ -21,10 +24,9 @@ export default function Home() {
   const openSwipeRef = useRef<SwipeableRef | null>(null);
 
   useEffect(() => {
-    if (isFocused && !carregouRef.current) {
-      carregarListas();
-      carregouRef.current = true;
-    }
+    if (!isFocused || carregouRef.current) return;
+    carregouRef.current = true;
+    carregarListas();
   }, [isFocused]);
 
   return (
@@ -65,15 +67,19 @@ export default function Home() {
             </Text>
           </View>
         ) : (
-          <View
+          <Animated.View
+            entering={FadeIn.duration(200)}
             style={{ marginTop: 20, flex: 1, overflow: "hidden" }}
-            key={isFocused ? "focused" : "unfocused"}
           >
             <FlatList
               data={listas}
               keyExtractor={(item) => item.id.toString()}
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{ paddingBottom: 20 }}
+              initialNumToRender={8}
+              maxToRenderPerBatch={5}
+              windowSize={5}
+              removeClippedSubviews={true}
               renderItem={({ item, index }) => (
                 <CardList
                   lista={item}
@@ -83,7 +89,7 @@ export default function Home() {
                 />
               )}
             />
-          </View>
+          </Animated.View>
         )}
       </View>
 

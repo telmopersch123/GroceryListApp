@@ -1,7 +1,7 @@
 import { TypeItens, TypeListRenderHome } from "../types/typesGlobal";
 import db from "./db";
 import { createItem } from "./listItemsRepository";
-
+export const LIMITE_LISTAS = 50;
 export function createList(
   name: string,
   category_id: number | null = null,
@@ -9,6 +9,14 @@ export function createList(
   flag?: string,
   typeCopy?: string
 ): TypeListRenderHome {
+  const count = db.getFirstSync<{ total: number }>(
+    "SELECT COUNT(*) as total FROM lists"
+  );
+
+  if (count && count.total >= LIMITE_LISTAS) {
+    throw new Error("LIMITE_LISTAS");
+  }
+
   const finalName = flag === "copy" ? `${name} (copy)` : name;
   const isFavorite = typeCopy === "favorites" ? 1 : 0;
   const result = db.runSync(
