@@ -14,14 +14,16 @@ interface ToastState extends ToastData {
 }
 
 let externalShow: ((data: ToastData) => void) | null = null;
+let externalShowModal: ((data: ToastData) => void) | null = null;
 
-export function useToast() {
+export function useToast(scope: "global" | "modal" = "global") {
   const [toast, setToast] = useState<ToastState>({
     visible: false,
     type: "success",
     text1: "",
     id: 0,
   });
+
   const show = (data: ToastData) => {
     setToast((prev) => ({ ...prev, visible: false }));
     setTimeout(() => {
@@ -33,11 +35,19 @@ export function useToast() {
     setToast((prev) => ({ ...prev, visible: false }));
   };
 
-  externalShow = show;
+  if (scope === "modal") {
+    externalShowModal = show;
+  } else {
+    externalShow = show;
+  }
 
   return { toast, show, hide };
 }
 
 export function showToast(data: ToastData) {
   externalShow?.(data);
+}
+
+export function showToastModal(data: ToastData) {
+  externalShowModal?.(data);
 }

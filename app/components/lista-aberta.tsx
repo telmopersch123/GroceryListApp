@@ -5,9 +5,11 @@ import {
 } from "@/app/database/listItemsRepository";
 import {
   getListById,
+  LIMITE_LISTAS_POR_CATEGORIA,
   updateListCategory,
 } from "@/app/database/listsRepository";
 import { ICONES } from "@/components/categorias/categoriaAccordion";
+import { Toast } from "@/components/ui/Toast";
 import { useGlobalStyles } from "@/constants/globalStyles";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowLeft, Check, Pencil, Star, Tag, X } from "lucide-react-native";
@@ -22,12 +24,21 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useLists } from "../context/ListsContext";
 import { getCategories } from "../database/categoriesRepository";
-import { Categoria, TypeItens, TypeListRenderHome } from "../types/typesGlobal";
+import { useMarquee } from "../hooks/useMarquee";
+import { useToast } from "../hooks/useToast";
+import { Categoria, TypeItens } from "../types/typesGlobal";
 import { FavoritedSingleList } from "../utils/functionFavorited";
 
-export default function ListaAberta() {
+export default function listasAberta() {
+  const {
+    toast: toastModal,
+    hide: hideModal,
+    show: showModal,
+  } = useToast("modal");
   const globalStyles = useGlobalStyles();
+  const { setListas: setLista, listas } = useLists();
   const { colors } = useSettings();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
@@ -35,10 +46,7 @@ export default function ListaAberta() {
   const params = useLocalSearchParams();
   const progressAnim = useRef(new Animated.Value(0)).current;
   const id = Number(params.id);
-
-  const [lista, setLista] = useState<TypeListRenderHome | undefined>(
-    () => getListById(id) ?? undefined
-  );
+  const lista = listas.find((l) => l.id === id);
   const [itens, setItens] = useState<TypeItens[]>(() => getItemsByListId(id));
   const [categorias, setCategorias] = useState<Categoria[]>(() =>
     getCategories()
@@ -47,7 +55,8 @@ export default function ListaAberta() {
     number | null
   >(() => getListById(id)?.category_id ?? null);
   const [modalCategorias, setModalCategorias] = useState(false);
-
+  const { translateX, shouldAnimate, onHiddenTextLayout, onContainerLayout } =
+    useMarquee(lista?.name ?? "");
   const from = params.from;
   const total = itens.length;
   const concluidos = itens.filter((item) => item.checked).length;
@@ -84,7 +93,6 @@ export default function ListaAberta() {
     <View
       style={[
         styles.container,
-
         { paddingTop: insets.top, paddingBottom: insets.bottom },
       ]}
     >
@@ -105,7 +113,27 @@ export default function ListaAberta() {
         >
           <ArrowLeft size={24} color={colors.text} />
         </Pressable>
-        <Text style={styles.title}>{lista?.name}</Text>
+        {shouldAnimate && (
+          <Text
+            style={[
+              styles.title,
+              { position: "absolute", opacity: 0, zIndex: -1 },
+            ]}
+            onLayout={onHiddenTextLayout}
+          >
+            {lista?.name}
+          </Text>
+        )}
+        <View
+          style={{ flex: 1, overflow: "hidden" }}
+          onLayout={onContainerLayout}
+        >
+          <Animated.Text
+            style={[styles.title, { transform: [{ translateX }], width: 9999 }]}
+          >
+            {lista?.name}
+          </Animated.Text>
+        </View>
       </View>
 
       {/* PROGRESS */}
@@ -186,7 +214,7 @@ export default function ListaAberta() {
         </Pressable>
       </View>
 
-      {/* LISTA */}
+      {/* lista */}
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
         {itens.map((item) => (
           <Pressable
@@ -238,15 +266,32 @@ export default function ListaAberta() {
                         ]}
                         onPress={() => {
                           if (lista) {
-                            updateListCategory(
-                              lista.id,
-                              selecionado ? null : categoria.id
-                            );
+                            try {
+                              const novaCategoria = selecionado
+                                ? null
+                                : categoria.id;
+                              updateListCategory(lista.id, novaCategoria);
+                              setCategoriaSelecionada(novaCategoria);
+                              setLista((prev) =>
+                                prev.map((l) =>
+                                  l.id === lista.id
+                                    ? { ...l, category_id: novaCategoria }
+                                    : l
+                                )
+                              );
+                              setModalCategorias(false);
+                            } catch (error: any) {
+                              if (
+                                error.message === "LIMITE_listaS_POR_CATEGORIA"
+                              ) {
+                                showModal({
+                                  type: "error",
+                                  text1: "Ops",
+                                  text2: `Limite de ${LIMITE_LISTAS_POR_CATEGORIA} listas na categoria "${categoria.nome}" atingido.`,
+                                });
+                              }
+                            }
                           }
-                          setCategoriaSelecionada(
-                            selecionado ? null : categoria.id
-                          );
-                          setModalCategorias(false);
                         }}
                       >
                         <View
@@ -321,6 +366,7 @@ export default function ListaAberta() {
             </ScrollView>
           </View>
         </View>
+        <Toast {...toastModal} onHide={hideModal} />
       </Modal>
     </View>
   );

@@ -1,7 +1,9 @@
 import { TypeItens, TypeListRenderHome } from "../types/typesGlobal";
+import { buildCopyName } from "../utils/functionCopyName";
 import db from "./db";
 import { createItem } from "./listItemsRepository";
 export const LIMITE_LISTAS = 50;
+export const LIMITE_LISTAS_POR_CATEGORIA = 10;
 export function createList(
   name: string,
   category_id: number | null = null,
@@ -17,7 +19,7 @@ export function createList(
     throw new Error("LIMITE_LISTAS");
   }
 
-  const finalName = flag === "copy" ? `${name} (copy)` : name;
+  const finalName = flag === "copy" ? buildCopyName(name) : name;
   const isFavorite = typeCopy === "favorites" ? 1 : 0;
   const result = db.runSync(
     "INSERT INTO lists (name, category_id, is_favorite) VALUES  (?, ?, ?)",
@@ -141,6 +143,15 @@ export function updateListCategory(
   id: number,
   category_id: number | null
 ): void {
+  if (category_id !== null) {
+    const count = db.getFirstSync<{ total: number }>(
+      "SELECT COUNT(*) as total FROM lists WHERE category_id = ? AND id != ?",
+      [category_id, id]
+    );
+    if (count && count.total >= LIMITE_LISTAS_POR_CATEGORIA) {
+      throw new Error("LIMITE_LISTAS_POR_CATEGORIA");
+    }
+  }
   db.runSync("UPDATE lists SET category_id = ? WHERE id = ?", [
     category_id,
     id,

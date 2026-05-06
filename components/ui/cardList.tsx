@@ -4,12 +4,13 @@ import {
   deleteList,
   LIMITE_LISTAS,
 } from "@/app/database/listsRepository";
-import { showToast } from "@/app/hooks/useToast";
 import { TypeListRenderHome } from "@/app/types/typesGlobal";
 import { FavoritedList } from "@/app/utils/functionFavorited";
 import { SwipeableRef } from "@/app/utils/functionsSwipe";
 import { useGlobalStyles } from "@/constants/globalStyles";
+import MaskedView from "@react-native-masked-view/masked-view";
 import { useIsFocused } from "@react-navigation/native";
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { Copy, Star } from "lucide-react-native";
 import { memo, RefObject, useEffect, useRef } from "react";
@@ -25,6 +26,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { RightAction } from "./RightAction";
+import { toastError, toastSuccess } from "./Toast";
 
 interface PropsCardList {
   lista: TypeListRenderHome;
@@ -84,23 +86,18 @@ function CardList({
     try {
       const novaLista = createList(
         lista.name,
-        lista.category_id,
+        null,
         lista.itens,
         "copy",
         typeCopy
       );
-      setListas((prev) => [...prev, novaLista]);
+      setListas((prev) => [novaLista, ...prev]);
+      toastSuccess("Lista copiada com sucesso!");
     } catch (error: any) {
       if (error.message === "LIMITE_LISTAS") {
-        showToast({
-          type: "error",
-          text1: `Limite de ${LIMITE_LISTAS} listas atingido.`,
-        });
+        toastError(`Limite de ${LIMITE_LISTAS} listas atingido.`);
       } else {
-        showToast({
-          type: "error",
-          text1: "Ocorreu um erro ao criar a lista.",
-        });
+        toastError("Ocorreu um erro ao criar a lista.");
       }
     }
   }
@@ -162,9 +159,25 @@ function CardList({
           ]}
         >
           <View style={globalStyles.cardHeader}>
-            <Text style={[globalStyles.cardTitle, { color: colors.text }]}>
-              {lista.name}
-            </Text>
+            <MaskedView
+              style={{ flex: 1 }}
+              maskElement={
+                <LinearGradient
+                  colors={["black", "black", "transparent"]}
+                  locations={[0, 0.7, 1]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={{ flex: 1, height: "100%" }}
+                />
+              }
+            >
+              <Text
+                numberOfLines={1}
+                style={[globalStyles.cardTitle, { color: colors.text }]}
+              >
+                {lista.name}
+              </Text>
+            </MaskedView>
 
             <View style={globalStyles.iconContainer}>
               {flag !== "category" && (
@@ -186,7 +199,7 @@ function CardList({
                 </Pressable>
               )}
               <Pressable
-                onPress={() => FavoritedList(lista, setListas, flag)}
+                onPress={() => FavoritedList(lista, setListas)}
                 style={({ pressed }) => [
                   globalStyles.iconButton,
                   pressed && { transform: [{ scale: 0.9 }] },

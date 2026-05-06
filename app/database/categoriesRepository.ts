@@ -1,7 +1,13 @@
 import { Categoria } from "../types/typesGlobal";
 import db from "./db";
-
+export const LIMITE_CATEGORIAS = 10;
 export function createCategory(nome: string, icon: number): Categoria {
+  const count = db.getFirstSync<{ total: number }>(
+    "SELECT COUNT(*) as total FROM categories"
+  );
+  if (count && count.total >= LIMITE_CATEGORIAS) {
+    throw new Error("LIMITE_CATEGORIAS");
+  }
   const result = db.runSync(
     "INSERT INTO categories (name, icon) VALUES (?, ?)",
     [nome, icon]
@@ -30,14 +36,6 @@ export function getCategories(): Categoria[] {
     created_at: row.created_at,
   }));
 }
-
-// export function updateCategory(id: number, nome: string, icon: string): void {
-//   db.runSync("UPDATE categories SET name = ?, icon = ? WHERE id = ?", [
-//     nome,
-//     icon,
-//     id,
-//   ]);
-// }
 
 export function deleteCategory(id: number): boolean {
   db.runSync("UPDATE lists SET category_id = NULL WHERE category_id = ?", [id]);

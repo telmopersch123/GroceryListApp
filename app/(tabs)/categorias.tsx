@@ -20,8 +20,8 @@ import {
   createCategory,
   deleteCategory,
   getCategories,
+  LIMITE_CATEGORIAS,
 } from "../database/categoriesRepository";
-import { showToast } from "../hooks/useToast";
 import { Categoria } from "../types/typesGlobal";
 import { closeAllSwipes, SwipeableRef } from "../utils/functionsSwipe";
 
@@ -60,14 +60,14 @@ export default function Categorias() {
     if (!nomeCategoria.trim()) {
       const msg = "O nome da categoria é obrigatório.";
       setError(msg);
-      toastError(msg);
+
       return;
     }
 
     if (categorias.some((c) => c.nome === nomeCategoria)) {
       const msg = "Já existe uma categoria com esse nome.";
       setError(msg);
-      toastError(msg);
+
       return;
     }
 
@@ -80,8 +80,12 @@ export default function Categorias() {
       } else {
         toastError("Ocorreu um erro ao criar a categoria.");
       }
-    } catch (error) {
-      toastError("Ocorreu um erro ao criar a categoria.");
+    } catch (error: any) {
+      if (error.message === "LIMITE_CATEGORIAS") {
+        toastError(`Você atingiu o limite de ${LIMITE_CATEGORIAS} categorias.`);
+      } else {
+        toastError("Ocorreu um erro ao criar a categoria.");
+      }
     }
 
     actionsheet({
@@ -98,24 +102,12 @@ export default function Categorias() {
       const results = deleteCategory(idCategory);
       if (results) {
         setCategorias((prev) => prev.filter((c) => c.id !== idCategory));
-        showToast({
-          type: "success",
-          text1: "Pronto",
-          text2: "Categoria removida com sucesso!",
-        });
+        toastSuccess("Categoria removida com sucesso!");
       } else {
-        showToast({
-          type: "error",
-          text1: "Ops",
-          text2: "Ocorreu um erro ao remover a categoria.",
-        });
+        toastError("Ocorreu um erro ao remover a categoria.");
       }
     } catch (error) {
-      showToast({
-        type: "error",
-        text1: "Ops",
-        text2: "Ocorreu um erro ao remover a categoria.",
-      });
+      toastError("Ocorreu um erro ao remover a categoria.");
     }
   };
 
@@ -128,11 +120,7 @@ export default function Categorias() {
         carregarListas();
       }
     } catch (error) {
-      showToast({
-        type: "error",
-        text1: "Ops",
-        text2: "Ocorreu um erro ao carregar as categorias.",
-      });
+      toastError("Ocorreu um erro ao carregar as categorias.");
     } finally {
       setLoading(false);
     }

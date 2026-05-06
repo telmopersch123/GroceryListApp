@@ -1,4 +1,5 @@
 import { useSettings } from "@/app/context/SettingsContext";
+import { toastError, toastSuccess } from "@/components/ui/Toast";
 import { TrashButton } from "@/components/ui/trashButton";
 import { useGlobalStyles } from "@/constants/globalStyles";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -25,7 +26,6 @@ import {
   LIMITE_ITENS,
 } from "../database/listItemsRepository";
 import { getListById, updateList } from "../database/listsRepository";
-import { showToast } from "../hooks/useToast";
 import { TypeItens, TypeListRenderHome } from "../types/typesGlobal";
 
 export default function EditarLista() {
@@ -86,23 +86,12 @@ export default function EditarLista() {
         pathname: "/components/lista-aberta",
         params: { id: lista?.id, from: from },
       });
-
-      showToast({
-        type: "success",
-        text1: "Pronto",
-        text2: "A sua lista foi editada com sucesso!",
-      });
+      toastSuccess("Lista editada com sucesso!");
     } catch (error: any) {
       if (error.message === "LIMITE_ITENS") {
-        showToast({
-          type: "error",
-          text1: `Limite de ${LIMITE_ITENS} itens por lista atingido.`,
-        });
+        toastError(`Limite de ${LIMITE_ITENS} itens por lista atingido.`);
       } else {
-        showToast({
-          type: "error",
-          text1: "Ocorreu um erro ao editar a lista.",
-        });
+        toastError("Ocorreu um erro ao editar a lista.");
       }
     }
   }

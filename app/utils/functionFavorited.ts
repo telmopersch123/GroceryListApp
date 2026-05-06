@@ -3,26 +3,25 @@ import { TypeListRenderHome } from "../types/typesGlobal";
 
 export function FavoritedList(
   list: TypeListRenderHome,
-  setListas: React.Dispatch<React.SetStateAction<TypeListRenderHome[]>>,
-  flag?: string
+  setListas: React.Dispatch<React.SetStateAction<TypeListRenderHome[]>>
 ) {
   toggleFavorite(list.id, !list.favorited);
-  setListas((prev) => {
-    if (flag === "favorites" && list.favorited) {
-      return prev.filter((l) => l.id !== list.id);
-    }
 
-    return prev.map((item) =>
+  setListas((prev) => {
+    const updated = prev.map((item) =>
       item.id === list.id ? { ...item, favorited: !item.favorited } : item
     );
+    return updated;
   });
 }
 
 export function FavoritedSingleList(
   list: TypeListRenderHome,
-  setLista: React.Dispatch<React.SetStateAction<TypeListRenderHome | undefined>>
+  setListas: React.Dispatch<React.SetStateAction<TypeListRenderHome[]>>
 ) {
   toggleFavorite(list.id, !list.favorited);
 
-  setLista((prev) => (prev ? { ...prev, favorited: !prev.favorited } : prev));
+  setListas((prev) =>
+    prev.map((l) => (l.id === list.id ? { ...l, favorited: !l.favorited } : l))
+  );
 }

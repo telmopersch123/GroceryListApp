@@ -19,12 +19,12 @@ import Animated, {
   LinearTransition,
 } from "react-native-reanimated";
 
+import { toastError, toastSuccess } from "@/components/ui/Toast";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLists } from "../context/ListsContext";
 import { useSettings } from "../context/SettingsContext";
 import { createItem, LIMITE_ITENS } from "../database/listItemsRepository";
 import { createList, LIMITE_LISTAS } from "../database/listsRepository";
-import { showToast } from "../hooks/useToast";
 
 export default function CriarLista() {
   const { colors, animationsEnabled } = useSettings();
@@ -80,28 +80,14 @@ export default function CriarLista() {
       };
       setListas((prev) => [listaComItens, ...prev]);
       router.back();
-
-      showToast({
-        type: "success",
-        text1: "Pronto",
-        text2: "A sua lista foi criada com sucesso!",
-      });
+      toastSuccess("A sua lista foi criada com sucesso!");
     } catch (error: any) {
       if (error.message === "LIMITE_LISTAS") {
-        showToast({
-          type: "error",
-          text1: `Limite de ${LIMITE_LISTAS} listas atingido.`,
-        });
+        toastError(`Limite de ${LIMITE_LISTAS} listas atingido.`);
       } else if (error.message === "LIMITE_ITENS") {
-        showToast({
-          type: "error",
-          text1: `Limite de ${LIMITE_ITENS} itens por lista atingido.`,
-        });
+        toastError(`Limite de ${LIMITE_ITENS} itens por lista atingido.`);
       } else {
-        showToast({
-          type: "error",
-          text1: "Ocorreu um erro ao criar a lista.",
-        });
+        toastError("Ocorreu um erro ao criar a lista.");
       }
     }
   }

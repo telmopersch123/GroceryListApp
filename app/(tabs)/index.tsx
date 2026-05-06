@@ -4,14 +4,13 @@ import { useGlobalStyles } from "@/constants/globalStyles";
 import { useIsFocused } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { Plus, ShoppingCart } from "lucide-react-native";
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLists } from "../context/ListsContext";
 import { useSettings } from "../context/SettingsContext";
 import { closeAllSwipes, SwipeableRef } from "../utils/functionsSwipe";
-
 export default function Home() {
   const { listas, setListas, carregarListas } = useLists();
 
@@ -22,7 +21,6 @@ export default function Home() {
   const router = useRouter();
   const carregouRef = useRef(false);
   const openSwipeRef = useRef<SwipeableRef | null>(null);
-
   useEffect(() => {
     if (!isFocused || carregouRef.current) return;
     carregouRef.current = true;
@@ -77,9 +75,9 @@ export default function Home() {
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{ paddingBottom: 20 }}
               initialNumToRender={8}
-              maxToRenderPerBatch={5}
-              windowSize={5}
-              removeClippedSubviews={true}
+              maxToRenderPerBatch={6}
+              windowSize={8}
+              removeClippedSubviews={false}
               renderItem={({ item, index }) => (
                 <CardList
                   lista={item}
