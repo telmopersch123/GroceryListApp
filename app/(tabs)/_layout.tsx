@@ -22,6 +22,7 @@ export default function TabLayout() {
     >
       <Tabs
         screenOptions={{
+          lazy: true,
           headerShown: false,
           tabBarActiveTintColor: colors.primary,
           tabBarActiveBackgroundColor: colors.background,
@@ -35,6 +36,10 @@ export default function TabLayout() {
             bottom: 0,
             backgroundColor: colors.background,
             borderTopColor: colors.border,
+          },
+          tabBarLabelStyle: {
+            fontSize: 11,
+            marginBottom: 4,
           },
         }}
       >

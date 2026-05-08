@@ -1,4 +1,5 @@
 import { useSettings } from "@/app/context/SettingsContext";
+import { getListsByCategory } from "@/app/database/listsRepository";
 import { Categoria, TypeListRenderHome } from "@/app/types/typesGlobal";
 import { closeAllSwipes, SwipeableRef } from "@/app/utils/functionsSwipe";
 import {
@@ -52,13 +53,13 @@ export const ICONES = [
 
 export function CategoriaAccordion({
   categoria,
-  listas,
+  totalListas,
   setListas,
   openSwipeRef,
   handleRemove,
 }: {
   categoria: Categoria;
-  listas: TypeListRenderHome[];
+  totalListas: number;
   setListas: React.Dispatch<React.SetStateAction<TypeListRenderHome[]>>;
   openSwipeRef: RefObject<SwipeableRef | null>;
   handleRemove: (id: number | null) => void;
@@ -66,10 +67,14 @@ export function CategoriaAccordion({
   const { colors, animationsEnabled } = useSettings();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [isOpen, setIsOpen] = useState(false);
+  const [foiAberto, setFoiAberto] = useState(false);
+  const [listasLocais, setListasLocais] = useState<TypeListRenderHome[]>([]);
   const isSwiping = useRef(false);
 
   const [contentHeight, setContentHeight] = useState<number | null>(null);
-  const animOpen = useRef(new Animated.Value(0)).current;
+  const animOpen = useRef(
+    new Animated.Value(animationsEnabled ? 0 : 0)
+  ).current;
   const animRotate = useRef(new Animated.Value(0)).current;
   const measured = useRef(false);
 
@@ -77,12 +82,16 @@ export function CategoriaAccordion({
   useEffect(() => {
     measured.current = false;
     setContentHeight(null);
-  }, [listas.length]);
+  }, [totalListas]);
 
   function toggle() {
     closeAllSwipes(openSwipeRef);
     if (isSwiping.current) return;
-
+    if (!foiAberto) {
+      setFoiAberto(true);
+      const listasDb = getListsByCategory(categoria.id);
+      setListasLocais(listasDb);
+    }
     const next = !isOpen;
     setIsOpen(next);
 
@@ -171,7 +180,7 @@ export function CategoriaAccordion({
 
           <View style={styles.categoriaRight}>
             <Text style={styles.categoriaListas}>
-              {listas.length} {listas.length === 1 ? "lista" : "listas"}
+              {totalListas} {totalListas === 1 ? "lista" : "listas"}
             </Text>
 
             <Animated.View style={{ transform: [{ rotate }] }}>
@@ -182,14 +191,14 @@ export function CategoriaAccordion({
 
         {(animationsEnabled || isOpen) && (
           <>
-            {!contentHeight && (
+            {!contentHeight && foiAberto && (
               <View
                 style={{ position: "absolute", opacity: 0, top: -9999 }}
                 onLayout={handleLayout}
               >
                 <View style={styles.accordionContent}>
-                  {listas.length > 0 ? (
-                    listas.map((lista, index) => (
+                  {listasLocais.length > 0 ? (
+                    listasLocais.map((lista, index) => (
                       <CardList
                         key={lista.id}
                         lista={lista}
@@ -210,19 +219,22 @@ export function CategoriaAccordion({
 
             <Animated.View
               style={{
-                height: contentHeight
-                  ? animOpen.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [0, contentHeight],
-                    })
-                  : 0,
+                height:
+                  animationsEnabled && contentHeight
+                    ? animOpen.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, contentHeight],
+                      })
+                    : isOpen
+                      ? undefined
+                      : 0,
                 opacity: animationsEnabled ? animOpen : 1,
                 overflow: "hidden",
               }}
             >
               <View style={styles.accordionContent}>
-                {listas.length > 0 ? (
-                  listas.map((lista, index) => (
+                {listasLocais.length > 0 ? (
+                  listasLocais.map((lista, index) => (
                     <CardList
                       key={lista.id}
                       lista={lista}

@@ -123,7 +123,11 @@ export default function CriarLista() {
       ]}
     >
       <View style={globalStyles.containerRow}>
-        <Pressable onPress={() => router.back()}>
+        <Pressable
+          hitSlop={20}
+          style={{ padding: 6 }}
+          onPress={() => router.back()}
+        >
           <ArrowLeft size={24} color={colors.text} />
         </Pressable>
 

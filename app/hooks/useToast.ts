@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 type ToastType = "success" | "error" | "info";
 
@@ -31,17 +31,24 @@ export function useToast(scope: "global" | "modal" = "global") {
     }, 150);
   };
 
+  const showRef = useRef(show);
+  showRef.current = show;
+
+  const stableShow = useRef((data: ToastData) => {
+    showRef.current(data);
+  }).current;
+
   const hide = () => {
     setToast((prev) => ({ ...prev, visible: false }));
   };
 
   if (scope === "modal") {
-    externalShowModal = show;
+    externalShowModal = stableShow;
   } else {
-    externalShow = show;
+    externalShow = stableShow;
   }
 
-  return { toast, show, hide };
+  return { toast, show: stableShow, hide };
 }
 
 export function showToast(data: ToastData) {

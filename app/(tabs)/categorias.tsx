@@ -3,6 +3,7 @@ import { CategoryModal } from "@/components/categorias/ModalCategorias";
 import { LoadingDots } from "@/components/ui/Loading";
 import { toastError, toastSuccess } from "@/components/ui/Toast";
 import { useGlobalStyles } from "@/constants/globalStyles";
+import { useIsFocused } from "@react-navigation/native";
 import { LayoutGrid, Plus } from "lucide-react-native";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -13,6 +14,7 @@ import {
   Text,
   View,
 } from "react-native";
+import Animated, { FadeIn } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLists } from "../context/ListsContext";
 import { useSettings } from "../context/SettingsContext";
@@ -43,7 +45,8 @@ function actionsheet({
 }
 
 export default function Categorias() {
-  const { colors } = useSettings();
+  const { colors, animationsEnabled } = useSettings();
+  const isFocused = useIsFocused();
   const { listas, setListas, carregarListas, listasCarregadas } = useLists();
   const globalStyles = useGlobalStyles();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -112,18 +115,21 @@ export default function Categorias() {
   };
 
   useEffect(() => {
-    try {
-      const categoriasDb = getCategories();
+    const time = setTimeout(() => {
+      try {
+        const categoriasDb = getCategories();
 
-      setCategorias(categoriasDb);
-      if (!listasCarregadas) {
-        carregarListas();
+        setCategorias(categoriasDb);
+        if (!listasCarregadas) {
+          carregarListas();
+        }
+      } catch (error) {
+        toastError("Ocorreu um erro ao carregar as categorias.");
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      toastError("Ocorreu um erro ao carregar as categorias.");
-    } finally {
-      setLoading(false);
-    }
+    }, 0);
+    return () => clearTimeout(time);
   }, []);
 
   return (
@@ -190,6 +196,7 @@ export default function Categorias() {
         ) : (
           <FlatList
             data={categorias}
+            key={isFocused ? "focused" : "unfocused"}
             keyExtractor={(item) => item.id.toString()}
             contentContainerStyle={styles.listContainer}
             keyboardDismissMode="on-drag"
@@ -198,18 +205,26 @@ export default function Categorias() {
             initialNumToRender={8}
             maxToRenderPerBatch={5}
             removeClippedSubviews={true}
-            renderItem={({ item: categoria }) => {
-              const listasDaCategoria = listas.filter(
+            renderItem={({ item: categoria, index }) => {
+              const totalListas = listas.filter(
                 (l) => l.category_id === categoria.id
-              );
+              ).length;
               return (
-                <CategoriaAccordion
-                  categoria={categoria}
-                  listas={listasDaCategoria}
-                  setListas={setListas}
-                  openSwipeRef={openSwipeRef}
-                  handleRemove={handleRemove}
-                />
+                <Animated.View
+                  entering={
+                    animationsEnabled
+                      ? FadeIn.duration(300).delay(index * 60)
+                      : undefined
+                  }
+                >
+                  <CategoriaAccordion
+                    categoria={categoria}
+                    totalListas={totalListas}
+                    setListas={setListas}
+                    openSwipeRef={openSwipeRef}
+                    handleRemove={handleRemove}
+                  />
+                </Animated.View>
               );
             }}
           />

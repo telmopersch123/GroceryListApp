@@ -13,7 +13,6 @@ import { useSettings } from "../context/SettingsContext";
 import { closeAllSwipes, SwipeableRef } from "../utils/functionsSwipe";
 export default function Home() {
   const { listas, setListas, carregarListas } = useLists();
-
   const insets = useSafeAreaInsets();
   const { colors } = useSettings();
   const globalStyles = useGlobalStyles();
@@ -21,10 +20,16 @@ export default function Home() {
   const router = useRouter();
   const carregouRef = useRef(false);
   const openSwipeRef = useRef<SwipeableRef | null>(null);
+  const flatListRef = useRef<FlatList>(null);
   useEffect(() => {
-    if (!isFocused || carregouRef.current) return;
-    carregouRef.current = true;
-    carregarListas();
+    if (!isFocused) return;
+
+    if (carregouRef.current) {
+      flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
+    } else {
+      carregouRef.current = true;
+      carregarListas();
+    }
   }, [isFocused]);
 
   return (
@@ -70,6 +75,7 @@ export default function Home() {
             style={{ marginTop: 20, flex: 1, overflow: "hidden" }}
           >
             <FlatList
+              ref={flatListRef}
               data={listas}
               keyExtractor={(item) => item.id.toString()}
               showsVerticalScrollIndicator={false}
@@ -78,6 +84,7 @@ export default function Home() {
               maxToRenderPerBatch={6}
               windowSize={8}
               removeClippedSubviews={false}
+              maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
               renderItem={({ item, index }) => (
                 <CardList
                   lista={item}

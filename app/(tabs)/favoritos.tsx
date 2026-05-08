@@ -17,8 +17,12 @@ export default function Favorites() {
   const openSwipeRef = useRef<SwipeableRef | null>(null);
   const insets = useSafeAreaInsets();
   const carregouRef = useRef(false);
+  const flatListRef = useRef<FlatList>(null);
   useEffect(() => {
-    if (isFocused && !carregouRef.current) {
+    if (!isFocused) return;
+    if (carregouRef.current) {
+      flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
+    } else {
       carregarListas();
       carregouRef.current = true;
     }
@@ -60,6 +64,7 @@ export default function Favorites() {
         ) : (
           <View style={{ marginTop: 20, flex: 1, overflow: "hidden" }}>
             <FlatList
+              ref={flatListRef}
               data={listasFavoritas}
               showsVerticalScrollIndicator={false}
               windowSize={5}

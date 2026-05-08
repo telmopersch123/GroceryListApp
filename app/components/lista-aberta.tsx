@@ -99,6 +99,8 @@ export default function listasAberta() {
       {/* HEADER */}
       <View style={styles.header}>
         <Pressable
+          hitSlop={20}
+          style={{ padding: 6 }}
           onPress={() => {
             if (from === "favorites") {
               router.dismissAll();
@@ -282,7 +284,7 @@ export default function listasAberta() {
                               setModalCategorias(false);
                             } catch (error: any) {
                               if (
-                                error.message === "LIMITE_listaS_POR_CATEGORIA"
+                                error.message === "LIMITE_LISTAS_POR_CATEGORIA"
                               ) {
                                 showModal({
                                   type: "error",

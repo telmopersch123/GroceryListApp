@@ -124,7 +124,11 @@ export default function EditarLista() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()}>
+        <Pressable
+          hitSlop={20}
+          style={{ padding: 6 }}
+          onPress={() => router.back()}
+        >
           <ArrowLeft size={24} color={colors.text} />
         </Pressable>
 

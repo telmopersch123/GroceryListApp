@@ -29,46 +29,6 @@ export const SettingsProvider = ({
 
   const themeAnim = useRef(new Animated.Value(0)).current;
 
-  // const toggleTheme = () => {
-  //   if (!animationsEnabled) {
-  //     const next = !isDark;
-  //     setIsDark(next);
-  //     AsyncStorage.setItem("theme", next ? "dark" : "light");
-  //     return;
-  //   }
-
-  //   Animated.timing(themeAnim, {
-  //     toValue: 1,
-  //     duration: DURATION,
-  //     useNativeDriver: true,
-  //   }).start(async () => {
-  //     setIsDark((prev) => {
-  //       const next = !prev;
-  //       AsyncStorage.setItem("theme", next ? "dark" : "light");
-  //       return next;
-  //     });
-
-  //     themeAnim.setValue(0);
-  //   });
-  // };
-
-  // const toggleTheme = () => {
-  //   const next = !isDark;
-
-  //   setIsDark(next);
-  //   AsyncStorage.setItem("theme", next ? "dark" : "light");
-
-  //   if (!animationsEnabled) return;
-
-  //   themeAnim.setValue(1);
-
-  //   Animated.timing(themeAnim, {
-  //     toValue: 0,
-  //     duration: DURATION,
-  //     useNativeDriver: true,
-  //   }).start();
-  // };
-
   const toggleTheme = () => {
     const next = !isDark;
 
