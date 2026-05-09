@@ -21,6 +21,7 @@ export default function Home() {
   const carregouRef = useRef(false);
   const openSwipeRef = useRef<SwipeableRef | null>(null);
   const flatListRef = useRef<FlatList>(null);
+
   useEffect(() => {
     if (!isFocused) return;
 
@@ -84,7 +85,6 @@ export default function Home() {
               maxToRenderPerBatch={6}
               windowSize={8}
               removeClippedSubviews={false}
-              maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
               renderItem={({ item, index }) => (
                 <CardList
                   lista={item}

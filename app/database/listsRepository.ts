@@ -126,7 +126,7 @@ export function updateList(
   ]);
   db.runSync("DELETE FROM list_items WHERE list_id = ?", [id]);
   for (const item of itens) {
-    createItem(id, item.name);
+    createItem(id, item.name, item.checked);
   }
 
   return {

@@ -1,6 +1,6 @@
 import Colors from "@/constants/Colors";
 import { useGlobalStyles } from "@/constants/globalStyles";
-import { Moon, Sparkles } from "lucide-react-native";
+import { Bell, Moon, Sparkles } from "lucide-react-native";
 import React, { useMemo } from "react";
 import { StyleSheet, Switch, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -12,6 +12,8 @@ export default function Configurações() {
     setAnimationsEnabled,
     isDark,
     toggleTheme,
+    notification,
+    setNotification,
     colors,
   } = useSettings();
 
@@ -77,6 +79,30 @@ export default function Configurações() {
             <Switch
               value={isDark}
               onValueChange={toggleTheme}
+              trackColor={{
+                false: colors.border,
+                true: colors.primary,
+              }}
+              thumbColor="#fff"
+              ios_backgroundColor={colors.border}
+            />
+          </View>
+          <View style={styles.divider} />
+
+          {/* Opção: Mensagens */}
+          <View style={styles.row}>
+            <View style={styles.iconLabel}>
+              <Bell size={22} color="#337539" />
+              <View style={styles.textContainer}>
+                <Text style={styles.label}>Avisos</Text>
+                <Text numberOfLines={2} style={styles.description}>
+                  Feedback visual de sucesso
+                </Text>
+              </View>
+            </View>
+            <Switch
+              value={notification}
+              onValueChange={setNotification}
               trackColor={{
                 false: colors.border,
                 true: colors.primary,

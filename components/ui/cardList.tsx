@@ -16,6 +16,7 @@ import { Copy, Star } from "lucide-react-native";
 import { memo, RefObject, useEffect, useRef } from "react";
 import { Pressable, Text, View } from "react-native";
 import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
+
 import Animated, {
   Easing,
   LinearTransition,
@@ -50,13 +51,12 @@ function CardList({
   const swipeableRef = useRef<SwipeableRef | null>(null);
   const isSwiping = useRef(false);
   const isFocused = useIsFocused();
-
   const total = lista.itens.length;
   const concluidos = lista.itens.filter((item) => item.checked).length;
   const porcentagem = total === 0 ? 0 : Math.round((concluidos / total) * 100);
   const opacity = useSharedValue(animationsEnabled ? 0 : 1);
   const translateY = useSharedValue(animationsEnabled ? 8 : 0);
-
+  const translateX = useSharedValue(0);
   useEffect(() => {
     if (!animationsEnabled || !isFocused) return;
 
@@ -71,12 +71,28 @@ function CardList({
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
-    transform: [{ translateY: translateY.value }],
+    transform: [
+      { translateY: translateY.value },
+      { translateX: translateX.value },
+    ],
   }));
 
   function onRemover() {
-    deleteList(lista.id);
-    setListas((prev) => prev.filter((l) => l.id !== lista.id));
+    if (animationsEnabled) {
+      translateX.value = withTiming(-400, {
+        duration: 280,
+        easing: Easing.in(Easing.cubic),
+      });
+      opacity.value = withTiming(0, { duration: 250 });
+
+      setTimeout(() => {
+        deleteList(lista.id);
+        setListas((prev) => prev.filter((l) => l.id !== lista.id));
+      }, 260);
+    } else {
+      deleteList(lista.id);
+      setListas((prev) => prev.filter((l) => l.id !== lista.id));
+    }
   }
 
   function CopyList(
@@ -256,11 +272,15 @@ function CardList({
   );
 }
 export default memo(CardList, (prev, next) => {
+  const itensIguais = prev.lista.itens.every(
+    (item, i) => item.checked === next.lista.itens[i]?.checked
+  );
   return (
     prev.lista.id === next.lista.id &&
     prev.lista.name === next.lista.name &&
     prev.lista.favorited === next.lista.favorited &&
     prev.lista.itens.length === next.lista.itens.length &&
-    prev.lista.category_id === next.lista.category_id
+    prev.lista.category_id === next.lista.category_id &&
+    itensIguais
   );
 });

@@ -165,6 +165,10 @@ export const useGlobalStyles = () => {
       padding: 15,
       borderRadius: 12,
       marginBottom: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderLeftWidth: 4,
+      borderLeftColor: "#1B5E20",
     },
     cardHeader: {
       flexDirection: "row",

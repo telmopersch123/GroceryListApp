@@ -48,9 +48,7 @@ export default function listasAberta() {
   const id = Number(params.id);
   const lista = listas.find((l) => l.id === id);
   const [itens, setItens] = useState<TypeItens[]>(() => getItemsByListId(id));
-  const [categorias, setCategorias] = useState<Categoria[]>(() =>
-    getCategories()
-  );
+  const [categorias, _] = useState<Categoria[]>(() => getCategories());
   const [categoriaSelecionada, setCategoriaSelecionada] = useState<
     number | null
   >(() => getListById(id)?.category_id ?? null);
@@ -86,6 +84,13 @@ export default function listasAberta() {
       })
     );
   }
+
+  useEffect(() => {
+    if (!lista) return;
+    setLista((prevListas) =>
+      prevListas.map((l) => (l.id === lista.id ? { ...l, itens } : l))
+    );
+  }, [itens]);
 
   const categoriaAtual = categorias.find((c) => c.id === categoriaSelecionada);
 

@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { useSettings } from "../context/SettingsContext";
 
 type ToastType = "success" | "error" | "info";
 
@@ -17,6 +18,7 @@ let externalShow: ((data: ToastData) => void) | null = null;
 let externalShowModal: ((data: ToastData) => void) | null = null;
 
 export function useToast(scope: "global" | "modal" = "global") {
+  const { notification } = useSettings();
   const [toast, setToast] = useState<ToastState>({
     visible: false,
     type: "success",
@@ -25,9 +27,14 @@ export function useToast(scope: "global" | "modal" = "global") {
   });
 
   const show = (data: ToastData) => {
-    setToast((prev) => ({ ...prev, visible: false }));
+    setToast((prev) => {
+      return { ...prev, visible: false };
+    });
     setTimeout(() => {
-      setToast({ ...data, visible: true, id: Date.now() });
+      const next = { ...data, visible: true, id: Date.now() };
+      console.log(next);
+      if (next.type === "success" && !notification) return;
+      setToast(next);
     }, 150);
   };
 

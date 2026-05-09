@@ -2,7 +2,7 @@ import { TrashButton } from "@/components/ui/trashButton";
 import { useGlobalStyles } from "@/constants/globalStyles";
 import { useRouter } from "expo-router";
 import { ArrowLeft, Plus, Save } from "lucide-react-native";
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   Keyboard,
   Pressable,
@@ -157,24 +157,43 @@ export default function CriarLista() {
         <Text style={globalStyles.label}>Itens da sua lista</Text>
 
         <View style={globalStyles.row}>
-          <TextInput
-            placeholder="Adicionar item..."
-            placeholderTextColor="#9E9E9E"
-            value={item}
-            maxLength={35}
-            onChangeText={(text) => {
-              setItem(text);
-              if (text.length >= 35)
-                return setErroItem("Limite de 35 caracteres");
-              if (text.trim()) setErroItem("");
-            }}
+          <View
             style={[
               globalStyles.input,
-              { flex: 1 },
+              {
+                flex: 1,
+                flexDirection: "row",
+                alignItems: "center",
+                paddingVertical: 0,
+              },
               erroItem && globalStyles.inputError,
             ]}
-          />
+          >
+            <TextInput
+              placeholder="Adicionar item..."
+              placeholderTextColor="#9E9E9E"
+              value={item}
+              maxLength={35}
+              onChangeText={(text) => {
+                setItem(text);
+                if (text.length >= 35)
+                  return setErroItem("Limite de 35 caracteres");
+                if (text.trim()) setErroItem("");
+              }}
+              style={[globalStyles.input, { flex: 1 }]}
+            />
 
+            <Text
+              style={{
+                fontSize: 12,
+                fontWeight: "500",
+                color: ItensList.length >= 8 ? "#BA7517" : "#9E9E9E",
+                paddingLeft: 8,
+              }}
+            >
+              0/{ItensList.length}
+            </Text>
+          </View>
           <Pressable
             onPress={() => {
               Keyboard.dismiss();

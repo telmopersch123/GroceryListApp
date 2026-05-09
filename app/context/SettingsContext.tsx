@@ -17,6 +17,8 @@ const SettingsContext = createContext({
   isDark: false,
   toggleTheme: () => {},
   themeAnim: new Animated.Value(0),
+  notification: false,
+  setNotification: (val: boolean) => {},
 });
 
 export const SettingsProvider = ({
@@ -26,6 +28,7 @@ export const SettingsProvider = ({
 }) => {
   const [isDark, setIsDark] = useState(false);
   const [animationsEnabled, setAnimationsEnabled] = useState(true);
+  const [notification, setNotification] = useState(true);
 
   const themeAnim = useRef(new Animated.Value(0)).current;
 
@@ -79,6 +82,8 @@ export const SettingsProvider = ({
         isDark,
         toggleTheme,
         themeAnim,
+        notification,
+        setNotification,
       }}
     >
       {children}
