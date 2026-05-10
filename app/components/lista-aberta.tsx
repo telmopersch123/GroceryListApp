@@ -8,11 +8,21 @@ import {
   LIMITE_LISTAS_POR_CATEGORIA,
   updateListCategory,
 } from "@/app/database/listsRepository";
+
 import { ICONES } from "@/components/categorias/categoriaAccordion";
 import { Toast } from "@/components/ui/Toast";
+import { WallpaperMercado } from "@/components/ui/WallpaperMercado";
 import { useGlobalStyles } from "@/constants/globalStyles";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ArrowLeft, Check, Pencil, Star, Tag, X } from "lucide-react-native";
+import {
+  ArrowLeft,
+  Check,
+  Pencil,
+  ShoppingCart,
+  Star,
+  Tag,
+  X,
+} from "lucide-react-native";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
@@ -101,6 +111,7 @@ export default function listasAberta() {
         { paddingTop: insets.top, paddingBottom: insets.bottom },
       ]}
     >
+      <WallpaperMercado />
       {/* HEADER */}
       <View style={styles.header}>
         <Pressable
@@ -192,9 +203,7 @@ export default function listasAberta() {
             color={lista?.favorited ? "#FFD700" : colors.iconColor}
             fill={lista?.favorited ? "#FFD700" : "transparent"}
           />
-          <Text
-            style={[styles.actionText, lista?.favorited && { color: "#fff" }]}
-          >
+          <Text style={[styles.actionText]}>
             {lista?.favorited ? "Desfavoritar" : "Favoritar"}
           </Text>
         </Pressable>
@@ -222,23 +231,73 @@ export default function listasAberta() {
       </View>
 
       {/* lista */}
-      <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
-        {itens.map((item) => (
-          <Pressable
-            key={item.id}
-            onPress={() => toggleItem(item.id)}
-            style={[styles.itemCard, item.checked && styles.itemChecked]}
+      <ScrollView contentContainerStyle={{ paddingBottom: 40, flexGrow: 1 }}>
+        {itens.length != 0 ? (
+          itens.map((item) => (
+            <Pressable
+              key={item.id}
+              onPress={() => toggleItem(item.id)}
+              style={[styles.itemCard, item.checked && styles.itemChecked]}
+            >
+              <View
+                style={[styles.circle, item.checked && styles.circleChecked]}
+              >
+                {item.checked && <Check size={14} color="#fff" />}
+              </View>
+              <Text
+                style={[
+                  styles.itemText,
+                  item.checked && styles.itemTextChecked,
+                  { flex: 1 },
+                ]}
+              >
+                {item.name}
+              </Text>
+            </Pressable>
+          ))
+        ) : (
+          <View
+            style={{
+              flex: 1,
+              alignItems: "center",
+              justifyContent: "center",
+              paddingVertical: 40,
+            }}
           >
-            <View style={[styles.circle, item.checked && styles.circleChecked]}>
-              {item.checked && <Check size={14} color="#fff" />}
+            <View
+              style={{
+                width: 64,
+                height: 64,
+                borderRadius: 32,
+                backgroundColor: colors.card,
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: 16,
+              }}
+            >
+              <ShoppingCart size={28} color={colors.subtext} />
             </View>
             <Text
-              style={[styles.itemText, item.checked && styles.itemTextChecked]}
+              style={{
+                fontSize: 16,
+                fontWeight: "500",
+                color: colors.text,
+                marginBottom: 6,
+              }}
             >
-              {item.name}
+              Nenhum item ainda
             </Text>
-          </Pressable>
-        ))}
+            <Text
+              style={{
+                fontSize: 13,
+                color: colors.subtext,
+                textAlign: "center",
+              }}
+            >
+              Edite a lista para adicionar itens
+            </Text>
+          </View>
+        )}
       </ScrollView>
 
       {/* MODAL */}

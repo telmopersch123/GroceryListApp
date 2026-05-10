@@ -8,7 +8,6 @@ import React, {
   useState,
 } from "react";
 import { Animated } from "react-native";
-const DURATION = 180;
 
 const SettingsContext = createContext({
   animationsEnabled: true,
@@ -19,6 +18,8 @@ const SettingsContext = createContext({
   themeAnim: new Animated.Value(0),
   notification: false,
   setNotification: (val: boolean) => {},
+  progressStyle: "line",
+  setProgressStyle: (val: "line" | "circle") => {},
 });
 
 export const SettingsProvider = ({
@@ -29,8 +30,26 @@ export const SettingsProvider = ({
   const [isDark, setIsDark] = useState(false);
   const [animationsEnabled, setAnimationsEnabled] = useState(true);
   const [notification, setNotification] = useState(true);
-
+  const [progressStyle, setProgressStyle] = useState<"line" | "circle">("line");
   const themeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      const [theme, animations, notif, progress] = await Promise.all([
+        AsyncStorage.getItem("theme"),
+        AsyncStorage.getItem("animationsEnabled"),
+        AsyncStorage.getItem("notification"),
+        AsyncStorage.getItem("progressStyle"),
+      ]);
+      setIsDark(theme === "dark");
+      if (animations !== null) setAnimationsEnabled(animations === "true");
+      if (notif !== null) setNotification(notif === "true");
+      if (progress === "line" || progress === "circle")
+        setProgressStyle(progress);
+      themeAnim.setValue(0);
+    };
+    loadSettings();
+  }, []);
 
   const toggleTheme = () => {
     const next = !isDark;
@@ -59,17 +78,20 @@ export const SettingsProvider = ({
     });
   };
 
-  useEffect(() => {
-    const loadTheme = async () => {
-      const saved = await AsyncStorage.getItem("theme");
-      const dark = saved === "dark";
+  const handleSetAnimationsEnabled = (val: boolean) => {
+    setAnimationsEnabled(val);
+    AsyncStorage.setItem("animationsEnabled", String(val));
+  };
 
-      setIsDark(dark);
-      themeAnim.setValue(0);
-    };
+  const handleSetNotification = (val: boolean) => {
+    setNotification(val);
+    AsyncStorage.setItem("notification", String(val));
+  };
 
-    loadTheme();
-  }, []);
+  const handleSetProgressStyle = (val: "line" | "circle") => {
+    setProgressStyle(val);
+    AsyncStorage.setItem("progressStyle", val);
+  };
 
   const colors = isDark ? Colors.dark : Colors.light;
 
@@ -77,13 +99,15 @@ export const SettingsProvider = ({
     <SettingsContext.Provider
       value={{
         animationsEnabled,
-        setAnimationsEnabled,
+        setAnimationsEnabled: handleSetAnimationsEnabled,
         colors,
         isDark,
         toggleTheme,
         themeAnim,
         notification,
-        setNotification,
+        setNotification: handleSetNotification,
+        progressStyle,
+        setProgressStyle: handleSetProgressStyle,
       }}
     >
       {children}

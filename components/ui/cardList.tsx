@@ -26,6 +26,7 @@ import Animated, {
   withDelay,
   withTiming,
 } from "react-native-reanimated";
+import Svg, { Circle } from "react-native-svg";
 import { RightAction } from "./RightAction";
 import { toastError, toastSuccess } from "./Toast";
 
@@ -46,7 +47,8 @@ function CardList({
   flag,
   typeCopy,
 }: PropsCardList) {
-  const { animationsEnabled, colors } = useSettings();
+  const { animationsEnabled, colors, progressStyle } = useSettings();
+
   const globalStyles = useGlobalStyles();
   const swipeableRef = useRef<SwipeableRef | null>(null);
   const isSwiping = useRef(false);
@@ -117,6 +119,14 @@ function CardList({
       }
     }
   }
+  function getProgressColor(porcentagem: number): string {
+    if (porcentagem === 100) return "#1B5E20";
+    if (porcentagem >= 75) return "#337539";
+    if (porcentagem >= 50) return "#558B2F";
+    if (porcentagem >= 25) return "#7CB342";
+    return "#C6D84B";
+  }
+
   return (
     <Animated.View style={animatedStyle} layout={LinearTransition}>
       <ReanimatedSwipeable
@@ -159,10 +169,7 @@ function CardList({
           onPress={() =>
             router.push({
               pathname: "/components/lista-aberta",
-              params: {
-                id: lista.id,
-                from: flag ?? "home",
-              },
+              params: { id: lista.id, from: flag ?? "home" },
             })
           }
           style={[
@@ -174,98 +181,224 @@ function CardList({
             },
           ]}
         >
-          <View style={globalStyles.cardHeader}>
-            <MaskedView
-              style={{ flex: 1 }}
-              maskElement={
-                <LinearGradient
-                  colors={["black", "black", "transparent"]}
-                  locations={[0, 0.7, 1]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={{ flex: 1, height: "100%" }}
-                />
-              }
+          {progressStyle === "circle" ? (
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 14,
+                paddingVertical: 4,
+              }}
             >
-              <Text
-                numberOfLines={1}
-                style={[globalStyles.cardTitle, { color: colors.text }]}
-              >
-                {lista.name}
-              </Text>
-            </MaskedView>
-
-            <View style={globalStyles.iconContainer}>
-              {flag !== "category" && (
-                <Pressable
-                  style={({ pressed }) => [
-                    globalStyles.iconButton,
-                    pressed && { transform: [{ scale: 0.9 }] },
-                  ]}
-                  onPress={() => {
-                    CopyList(lista, setListas);
+              {/* Anel com % no centro */}
+              <View style={{ width: 56, height: 56 }}>
+                <Svg
+                  width={56}
+                  height={56}
+                  viewBox="0 0 36 36"
+                  style={{ transform: [{ rotate: "-90deg" }] }}
+                >
+                  <Circle
+                    cx={18}
+                    cy={18}
+                    r={14}
+                    fill="none"
+                    stroke={colors.border}
+                    strokeWidth={3}
+                  />
+                  <Circle
+                    cx={18}
+                    cy={18}
+                    r={14}
+                    fill="none"
+                    stroke={getProgressColor(porcentagem)}
+                    strokeWidth={3}
+                    strokeDasharray={87.96}
+                    strokeDashoffset={87.96 - (87.96 * porcentagem) / 100}
+                    strokeLinecap="round"
+                  />
+                </Svg>
+                <View
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
-                  {({ pressed }) => (
-                    <Copy
-                      size={18}
-                      color={pressed ? colors.primary : colors.iconColor}
+                  <Text
+                    style={{
+                      fontSize: 11,
+                      fontWeight: "500",
+                      color: getProgressColor(porcentagem),
+                    }}
+                  >
+                    {porcentagem}%
+                  </Text>
+                </View>
+              </View>
+
+              {/* Conteúdo direito */}
+              <View style={{ flex: 1, gap: 6 }}>
+                <View style={globalStyles.cardHeader}>
+                  <MaskedView
+                    style={{ flex: 1 }}
+                    maskElement={
+                      <LinearGradient
+                        colors={["black", "black", "transparent"]}
+                        locations={[0, 0.7, 1]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={{ flex: 1, height: "100%" }}
+                      />
+                    }
+                  >
+                    <Text
+                      numberOfLines={1}
+                      style={[globalStyles.cardTitle, { color: colors.text }]}
+                    >
+                      {lista.name}
+                    </Text>
+                  </MaskedView>
+
+                  <View style={globalStyles.iconContainer}>
+                    {flag !== "category" && (
+                      <Pressable
+                        style={({ pressed }) => [
+                          globalStyles.iconButton,
+                          pressed && { transform: [{ scale: 0.9 }] },
+                        ]}
+                        onPress={() => CopyList(lista, setListas)}
+                      >
+                        {({ pressed }) => (
+                          <Copy
+                            size={18}
+                            color={pressed ? colors.primary : colors.iconColor}
+                          />
+                        )}
+                      </Pressable>
+                    )}
+                    <Pressable
+                      onPress={() => FavoritedList(lista, setListas)}
+                      style={({ pressed }) => [
+                        globalStyles.iconButton,
+                        pressed && { transform: [{ scale: 0.9 }] },
+                      ]}
+                    >
+                      {({ pressed }) => {
+                        const isActive = lista.favorited || pressed;
+                        return (
+                          <Star
+                            size={18}
+                            color={isActive ? "#FFD700" : colors.iconColor}
+                            fill={isActive ? "#FFD700" : "transparent"}
+                          />
+                        );
+                      }}
+                    </Pressable>
+                  </View>
+                </View>
+
+                <Text
+                  style={[globalStyles.itemsText, { color: colors.subtext }]}
+                >
+                  {concluidos}/{total} itens concluídos
+                </Text>
+              </View>
+            </View>
+          ) : (
+            <>
+              <View style={globalStyles.cardHeader}>
+                <MaskedView
+                  style={{ flex: 1 }}
+                  maskElement={
+                    <LinearGradient
+                      colors={["black", "black", "transparent"]}
+                      locations={[0, 0.7, 1]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={{ flex: 1, height: "100%" }}
                     />
+                  }
+                >
+                  <Text
+                    numberOfLines={1}
+                    style={[globalStyles.cardTitle, { color: colors.text }]}
+                  >
+                    {lista.name}
+                  </Text>
+                </MaskedView>
+
+                <View style={globalStyles.iconContainer}>
+                  {flag !== "category" && (
+                    <Pressable
+                      style={({ pressed }) => [
+                        globalStyles.iconButton,
+                        pressed && { transform: [{ scale: 0.9 }] },
+                      ]}
+                      onPress={() => CopyList(lista, setListas)}
+                    >
+                      {({ pressed }) => (
+                        <Copy
+                          size={18}
+                          color={pressed ? colors.primary : colors.iconColor}
+                        />
+                      )}
+                    </Pressable>
                   )}
-                </Pressable>
-              )}
-              <Pressable
-                onPress={() => FavoritedList(lista, setListas)}
-                style={({ pressed }) => [
-                  globalStyles.iconButton,
-                  pressed && { transform: [{ scale: 0.9 }] },
-                ]}
-              >
-                {({ pressed }) => {
-                  const isActive = lista.favorited || pressed;
+                  <Pressable
+                    onPress={() => FavoritedList(lista, setListas)}
+                    style={({ pressed }) => [
+                      globalStyles.iconButton,
+                      pressed && { transform: [{ scale: 0.9 }] },
+                    ]}
+                  >
+                    {({ pressed }) => {
+                      const isActive = lista.favorited || pressed;
+                      return (
+                        <Star
+                          size={18}
+                          color={isActive ? "#FFD700" : colors.iconColor}
+                          fill={isActive ? "#FFD700" : "transparent"}
+                        />
+                      );
+                    }}
+                  </Pressable>
+                </View>
+              </View>
 
-                  return (
-                    <Star
-                      size={18}
-                      color={isActive ? "#FFD700" : colors.iconColor}
-                      fill={isActive ? "#FFD700" : "transparent"}
-                    />
-                  );
-                }}
-              </Pressable>
-            </View>
-          </View>
+              <View style={globalStyles.progressRow}>
+                <View
+                  style={[
+                    globalStyles.progressContainer,
+                    { backgroundColor: colors.border },
+                  ]}
+                >
+                  <View
+                    style={[
+                      globalStyles.progressBar,
+                      {
+                        backgroundColor: getProgressColor(porcentagem),
+                        width: `${porcentagem}%`,
+                      },
+                    ]}
+                  />
+                </View>
+                <Text
+                  style={[globalStyles.progressText, { color: colors.subtext }]}
+                >
+                  {porcentagem}%
+                </Text>
+              </View>
 
-          <View style={globalStyles.progressRow}>
-            <View
-              style={[
-                globalStyles.progressContainer,
-                {
-                  backgroundColor: colors.border,
-                },
-              ]}
-            >
-              <View
-                style={[
-                  globalStyles.progressBar,
-                  {
-                    backgroundColor: colors.primary,
-                    width: `${porcentagem}%`,
-                  },
-                ]}
-              />
-            </View>
-
-            <Text
-              style={[globalStyles.progressText, { color: colors.subtext }]}
-            >
-              {porcentagem}%
-            </Text>
-          </View>
-
-          <Text style={[globalStyles.itemsText, { color: colors.subtext }]}>
-            {concluidos}/{total} itens concluídos
-          </Text>
+              <Text style={[globalStyles.itemsText, { color: colors.subtext }]}>
+                {concluidos}/{total} itens concluídos
+              </Text>
+            </>
+          )}
         </Pressable>
       </ReanimatedSwipeable>
     </Animated.View>

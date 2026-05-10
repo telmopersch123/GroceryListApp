@@ -1,3 +1,4 @@
+import { ProgressStyleSelector } from "@/components/configurações/ProgressStyleSelector";
 import Colors from "@/constants/Colors";
 import { useGlobalStyles } from "@/constants/globalStyles";
 import { Bell, Moon, Sparkles } from "lucide-react-native";
@@ -15,6 +16,8 @@ export default function Configurações() {
     notification,
     setNotification,
     colors,
+    progressStyle,
+    setProgressStyle,
   } = useSettings();
 
   const globalStyles = useGlobalStyles();
@@ -111,6 +114,14 @@ export default function Configurações() {
               ios_backgroundColor={colors.border}
             />
           </View>
+
+          <View style={styles.divider} />
+
+          <ProgressStyleSelector
+            progressStyle={progressStyle as "line" | "circle"}
+            setProgressStyle={setProgressStyle}
+            colors={colors}
+          />
         </View>
       </View>
     </View>

@@ -143,7 +143,7 @@ export default function CriarLista() {
             placeholder="Ex: Compras do mês de Janeiro"
             placeholderTextColor="#9E9E9E"
             value={nomeLista}
-            maxLength={35}
+            maxLength={50}
             onChangeText={(text) => {
               setNomeLista(text);
               if (text.trim()) setErroNome("");
@@ -173,11 +173,11 @@ export default function CriarLista() {
               placeholder="Adicionar item..."
               placeholderTextColor="#9E9E9E"
               value={item}
-              maxLength={35}
+              maxLength={40}
               onChangeText={(text) => {
                 setItem(text);
-                if (text.length >= 35)
-                  return setErroItem("Limite de 35 caracteres");
+                if (text.length >= 40)
+                  return setErroItem("Limite de 40 caracteres");
                 if (text.trim()) setErroItem("");
               }}
               style={[globalStyles.input, { flex: 1 }]}
@@ -226,7 +226,14 @@ export default function CriarLista() {
               }
               style={globalStyles.itemCard}
             >
-              <Text style={globalStyles.itemText}>{item.name}</Text>
+              <Text
+                style={[
+                  globalStyles.itemText,
+                  { flexShrink: 1, marginRight: 8 },
+                ]}
+              >
+                {item.name}
+              </Text>
 
               <TrashButton
                 onPress={() => handleRemover(item.id)}
