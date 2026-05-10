@@ -1,4 +1,5 @@
 import { useSettings } from "@/app/context/SettingsContext";
+import { TextComNegrito } from "@/components/ui/TextNegrito";
 import { toastError, toastSuccess } from "@/components/ui/Toast";
 import { TrashButton } from "@/components/ui/trashButton";
 import { useGlobalStyles } from "@/constants/globalStyles";
@@ -203,7 +204,10 @@ export default function EditarLista() {
             }
             style={globalStyles.itemCard}
           >
-            <Text style={globalStyles.itemText}>{item.name}</Text>
+            <TextComNegrito
+              texto={item.name}
+              style={[globalStyles.itemText, { flexShrink: 1, marginRight: 8 }]}
+            />
 
             <TrashButton
               onPress={() => handleRemover(item.id)}

@@ -10,6 +10,7 @@ import {
 } from "@/app/database/listsRepository";
 
 import { ICONES } from "@/components/categorias/categoriaAccordion";
+import { TextComNegrito } from "@/components/ui/TextNegrito";
 import { Toast } from "@/components/ui/Toast";
 import { WallpaperMercado } from "@/components/ui/WallpaperMercado";
 import { useGlobalStyles } from "@/constants/globalStyles";
@@ -39,6 +40,7 @@ import { getCategories } from "../database/categoriesRepository";
 import { useMarquee } from "../hooks/useMarquee";
 import { useToast } from "../hooks/useToast";
 import { Categoria, TypeItens } from "../types/typesGlobal";
+import { getProgressColor } from "../utils/functionColorBar";
 import { FavoritedSingleList } from "../utils/functionFavorited";
 
 export default function listasAberta() {
@@ -158,7 +160,14 @@ export default function listasAberta() {
       <View style={styles.progressRow}>
         <View style={styles.progressContainer}>
           <Animated.View
-            style={[styles.progressBar, { width: widthInterpolada }]}
+            style={[
+              globalStyles.progressBar,
+              {
+                backgroundColor: getProgressColor(porcentagem),
+              },
+              { width: widthInterpolada },
+            ]}
+            // style={[styles.progressBar, { width: widthInterpolada }]}
           />
         </View>
         <Text style={styles.percent}>{Math.round(porcentagem)}%</Text>
@@ -244,15 +253,14 @@ export default function listasAberta() {
               >
                 {item.checked && <Check size={14} color="#fff" />}
               </View>
-              <Text
+              <TextComNegrito
+                texto={item.name}
                 style={[
-                  styles.itemText,
-                  item.checked && styles.itemTextChecked,
-                  { flex: 1 },
+                  globalStyles.itemText,
+                  { flexShrink: 1, marginRight: 8 },
                 ]}
-              >
-                {item.name}
-              </Text>
+                checkedStyle={item.checked ? styles.itemTextChecked : undefined}
+              />
             </Pressable>
           ))
         ) : (

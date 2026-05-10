@@ -19,6 +19,7 @@ import Animated, {
   LinearTransition,
 } from "react-native-reanimated";
 
+import { TextComNegrito } from "@/components/ui/TextNegrito";
 import { toastError, toastSuccess } from "@/components/ui/Toast";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLists } from "../context/ListsContext";
@@ -226,14 +227,13 @@ export default function CriarLista() {
               }
               style={globalStyles.itemCard}
             >
-              <Text
+              <TextComNegrito
+                texto={item.name}
                 style={[
                   globalStyles.itemText,
                   { flexShrink: 1, marginRight: 8 },
                 ]}
-              >
-                {item.name}
-              </Text>
+              />
 
               <TrashButton
                 onPress={() => handleRemover(item.id)}
