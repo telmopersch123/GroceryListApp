@@ -35,4 +35,13 @@ db.execSync(`
   );
 `);
 
+db.execSync(`
+  CREATE TABLE IF NOT EXISTS user_preferences (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    shopping_period TEXT NOT NULL,
+    onboarding_completed INTEGER DEFAULT 0
+  );
+`);
+
 export default db;
