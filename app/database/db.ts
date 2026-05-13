@@ -41,6 +41,7 @@ db.execSync(`
     username TEXT NOT NULL,
     shopping_period TEXT NOT NULL,
     onboarding_completed INTEGER DEFAULT 0
+
   );
 `);
 

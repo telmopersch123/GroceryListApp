@@ -6,14 +6,19 @@ export interface UserPreferences {
   onboarding_completed: number;
 }
 export function saveUserPreferences(data: UserPreferences) {
-  db.runSync(
-    `
+  const existing = getUserPreferences();
+  if (existing) {
+    updateUserPreferences({ ...data, id: existing.id });
+  } else {
+    db.runSync(
+      `
     INSERT INTO user_preferences
     (username, shopping_period, onboarding_completed)
     VALUES (?, ?, ?)
     `,
-    [data.username, data.shopping_period, data.onboarding_completed]
-  );
+      [data.username, data.shopping_period, data.onboarding_completed]
+    );
+  }
 }
 
 export function getUserPreferences(): UserPreferences | null {
