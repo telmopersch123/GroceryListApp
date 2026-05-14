@@ -1,3 +1,4 @@
+import { NotificationsSettings } from "@/components/configurações/NotificationsSettings";
 import { ProgressStyleSelector } from "@/components/configurações/ProgressStyleSelector";
 import Colors from "@/constants/Colors";
 import { useGlobalStyles } from "@/constants/globalStyles";
@@ -90,6 +91,7 @@ export default function Configurações() {
               ios_backgroundColor={colors.border}
             />
           </View>
+
           <View style={styles.divider} />
 
           {/* Opção: Mensagens */}
@@ -116,7 +118,9 @@ export default function Configurações() {
           </View>
 
           <View style={styles.divider} />
-
+          <NotificationsSettings />
+          <View style={styles.divider} />
+          {/* Opção: Estilo de Progresso */}
           <ProgressStyleSelector
             progressStyle={progressStyle as "line" | "circle"}
             setProgressStyle={setProgressStyle}

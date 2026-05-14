@@ -32,10 +32,22 @@ export function getUserPreferences(): UserPreferences | null {
 export function updateUserPreferences(data: UserPreferences) {
   db.runSync(
     `
-      UPDATE user_preferences
-      SET username = ?, shopping_period = ?
-      WHERE id = ?
+    UPDATE user_preferences
+    SET username = ?, shopping_period = ?
+    WHERE id = ?
     `,
     [data.username, data.shopping_period, data.id ?? null]
+  );
+}
+
+export function updatePeriod(shopping_period: string, id: number) {
+  console.log(shopping_period, id);
+  db.runSync(
+    `
+      UPDATE user_preferences
+      SET shopping_period = ?
+      WHERE id = ?
+    `,
+    [shopping_period, id ?? null]
   );
 }

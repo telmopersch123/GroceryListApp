@@ -20,6 +20,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { NotificationsDate } from "../json/notificationsjson";
 
 type ShoppingPeriod = "inicio" | "meio" | "final" | "inicio_final";
 interface PropsOnboarding {
@@ -105,24 +106,7 @@ export default function Onboarding({ onFinish }: PropsOnboarding) {
               </Text>
 
               <View style={styles.optionsContainer}>
-                {[
-                  {
-                    id: "inicio",
-                    label: "Início do mês",
-                  },
-                  {
-                    id: "meio",
-                    label: "Meio do mês",
-                  },
-                  {
-                    id: "final",
-                    label: "Final do mês",
-                  },
-                  {
-                    id: "inicio_final",
-                    label: "Entre o final e o início do mês",
-                  },
-                ].map((item) => {
+                {NotificationsDate.map((item) => {
                   const selected = period === item.id;
 
                   return (

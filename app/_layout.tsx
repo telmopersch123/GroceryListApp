@@ -10,7 +10,6 @@ import { SettingsProvider, useSettings } from "./context/SettingsContext";
 import { useEffect, useState } from "react";
 import Onboarding from "./components/onboarding";
 import { ListsProvider } from "./context/ListsContext";
-import db from "./database/db";
 import { getUserPreferences } from "./database/userPreferencesRepository";
 import { useToast } from "./hooks/useToast";
 
@@ -19,15 +18,15 @@ function AppContent() {
   const { colors, isDark } = useSettings();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    async function reset() {
-      db.runSync(`DELETE FROM user_preferences`);
+  // useEffect(() => {
+  //   async function reset() {
+  //     db.runSync(`DELETE FROM user_preferences`);
 
-      console.log("resetado");
-    }
+  //     console.log("resetado");
+  //   }
 
-    reset();
-  }, []);
+  //   reset();
+  // }, []);
   useEffect(() => {
     async function checkOnboarding() {
       try {
