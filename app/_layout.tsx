@@ -7,6 +7,12 @@ import { View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SettingsProvider, useSettings } from "./context/SettingsContext";
 
+import * as Notifications from "expo-notifications";
+import {
+  cancelAllNotifications,
+  scheduleNotifications,
+} from "./utils/notifications";
+
 import { useEffect, useState } from "react";
 import Onboarding from "./components/onboarding";
 import { ListsProvider } from "./context/ListsContext";
@@ -21,17 +27,30 @@ function AppContent() {
   // useEffect(() => {
   //   async function reset() {
   //     db.runSync(`DELETE FROM user_preferences`);
-
   //     console.log("resetado");
   //   }
-
   //   reset();
   // }, []);
+
+  useEffect(() => {
+    const sub = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        if (response.actionIdentifier === "already_done") {
+          cancelAllNotifications();
+        }
+      }
+    );
+    return () => sub.remove();
+  }, []);
   useEffect(() => {
     async function checkOnboarding() {
       try {
-        const userpass = await getUserPreferences();
+        const userpass = getUserPreferences();
         setShowOnboarding(!userpass?.username);
+        await scheduleNotifications(
+          userpass?.username || "Amigo",
+          userpass?.shopping_period || "final"
+        );
       } catch (error) {
         console.error("Error checking onboarding status:", error);
       } finally {
@@ -64,7 +83,7 @@ function AppContent() {
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
-          name="criar-lista"
+          name="components/criar-lista"
           options={{
             presentation: "modal",
             headerShown: true,

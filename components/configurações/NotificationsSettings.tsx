@@ -6,6 +6,7 @@ import {
 } from "@/app/database/userPreferencesRepository";
 import { showToast } from "@/app/hooks/useToast";
 import { NotificationsDate } from "@/app/json/notificationsjson";
+import { scheduleNotifications } from "@/app/utils/notifications";
 import { BellRing, Check, ChevronDown } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -38,12 +39,8 @@ export const NotificationsSettings = () => {
   const styles = useMemo(() => makeStyles(colors), [colors]);
 
   useEffect(() => {
-    try {
-      const fetchNotifications = getUserPreferences();
-      setNotificationsUser(fetchNotifications);
-    } catch (error) {
-      console.log("Erro ao carregar as notificações: ", error);
-    }
+    const fetchNotifications = getUserPreferences();
+    setNotificationsUser(fetchNotifications);
   }, []);
 
   const toggleDropdown = () => {
@@ -51,14 +48,21 @@ export const NotificationsSettings = () => {
 
     setOpen(!open);
   };
-  const handleSelect = (value: string, id: number) => {
+  const handleSelect = async (value: string, id: number) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     updatePeriod(value, id);
 
-    setNotificationsUser({
+    const updatedUser = {
       ...notificationsUser,
       shopping_period: value,
-    } as UserPreferences);
+    } as UserPreferences;
+
+    setNotificationsUser(updatedUser);
+
+    await scheduleNotifications(
+      updatedUser.username,
+      updatedUser.shopping_period
+    );
 
     showToast({
       type: "success",

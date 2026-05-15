@@ -41,7 +41,6 @@ export function updateUserPreferences(data: UserPreferences) {
 }
 
 export function updatePeriod(shopping_period: string, id: number) {
-  console.log(shopping_period, id);
   db.runSync(
     `
       UPDATE user_preferences

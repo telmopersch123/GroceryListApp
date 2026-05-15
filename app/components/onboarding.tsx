@@ -21,6 +21,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { NotificationsDate } from "../json/notificationsjson";
+import { scheduleNotifications } from "../utils/notifications";
 
 type ShoppingPeriod = "inicio" | "meio" | "final" | "inicio_final";
 interface PropsOnboarding {
@@ -39,7 +40,7 @@ export default function Onboarding({ onFinish }: PropsOnboarding) {
       width: `${progressValue.value}%`,
     };
   });
-  function handleContinue() {
+  async function handleContinue() {
     if (step === 1) {
       if (!name.trim()) return;
 
@@ -48,12 +49,13 @@ export default function Onboarding({ onFinish }: PropsOnboarding) {
     }
 
     if (!period) return;
-
     saveUserPreferences({
       username: name.trim(),
       shopping_period: period,
       onboarding_completed: 1,
     });
+
+    await scheduleNotifications(name.trim(), period);
 
     onFinish();
   }

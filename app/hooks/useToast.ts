@@ -32,7 +32,7 @@ export function useToast(scope: "global" | "modal" = "global") {
     });
     setTimeout(() => {
       const next = { ...data, visible: true, id: Date.now() };
-      console.log(next);
+
       if (next.type === "success" && !notification) return;
       setToast(next);
     }, 150);
