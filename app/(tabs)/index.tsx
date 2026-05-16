@@ -4,7 +4,7 @@ import { useGlobalStyles } from "@/constants/globalStyles";
 import { useIsFocused } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { Plus, ShoppingCart } from "lucide-react-native";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -21,16 +21,25 @@ export default function Home() {
   const carregouRef = useRef(false);
   const openSwipeRef = useRef<SwipeableRef | null>(null);
   const flatListRef = useRef<FlatList>(null);
-
+  const [loadingLists, setLoadingLists] = useState(true);
   useEffect(() => {
     if (!isFocused) return;
 
     if (carregouRef.current) {
-      flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
-    } else {
-      carregouRef.current = true;
-      carregarListas();
+      flatListRef.current?.scrollToOffset({
+        offset: 0,
+        animated: false,
+      });
+
+      return;
     }
+
+    carregouRef.current = true;
+    carregarListas();
+
+    requestAnimationFrame(() => {
+      setLoadingLists(false);
+    });
   }, [isFocused]);
 
   return (
@@ -59,7 +68,7 @@ export default function Home() {
             marginHorizontal: -20,
           }}
         />
-        {listas.length === 0 ? (
+        {listas.length === 0 && !loadingLists ? (
           <View style={globalStyles.emptyContainer}>
             <View style={globalStyles.iconCircle}>
               <ShoppingCart size={32} color="#424242" />
