@@ -1,11 +1,12 @@
 {
   "expo": {
-    "name": "GroceryListNew",
+    "name": "GroceryList",
     "slug": "GroceryListNew",
+    "jsEngine": "jsc",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/iconApp.png",
-    "scheme": "grocerylistnew",
+    "scheme": "grocerylist",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
@@ -20,11 +21,12 @@
     "android": {
       "icon": "./assets/images/iconApp.png",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/iconApp.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.grocerylist.app"
     },
     "web": {
       "bundler": "metro",
@@ -38,6 +40,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "028760af-1731-4743-92ac-4814c17e384d"
+      }
+    },
+    "owner": "telmopersch"
   }
 }
