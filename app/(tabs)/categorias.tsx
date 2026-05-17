@@ -159,7 +159,7 @@ export default function Categorias() {
               ]}
               onPress={() => setModalVisivel(true)}
             >
-              <Plus size={18} color={colors.text} />
+              <Plus size={18} color={"#fff"} />
               <Text style={styles.buttonText}>Nova categoria</Text>
             </Pressable>
           )}
@@ -190,7 +190,7 @@ export default function Categorias() {
               ]}
               onPress={() => setModalVisivel(true)}
             >
-              <Plus size={18} color={colors.text} />
+              <Plus size={18} color={"#fff"} />
               <Text style={styles.buttonText}>Nova categoria</Text>
             </Pressable>
           </View>
@@ -276,7 +276,7 @@ const makeStyles = (colors: any) =>
     },
 
     buttonText: {
-      color: colors.text,
+      color: "#fff",
       fontWeight: "bold",
       fontSize: 13,
     },

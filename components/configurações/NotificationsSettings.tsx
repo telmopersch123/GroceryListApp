@@ -7,10 +7,12 @@ import {
   updatePeriod,
   UserPreferences,
 } from "@/database/userPreferencesRepository";
+import * as Notifications from "expo-notifications";
 import { BellRing, Check, ChevronDown } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
 import {
   LayoutAnimation,
+  Linking,
   Platform,
   Pressable,
   StyleSheet,
@@ -18,7 +20,6 @@ import {
   UIManager,
   View,
 } from "react-native";
-
 if (
   Platform.OS === "android" &&
   UIManager.setLayoutAnimationEnabledExperimental
@@ -49,6 +50,18 @@ export const NotificationsSettings = () => {
     setOpen(!open);
   };
   const handleSelect = async (value: string, id: number) => {
+    const { status } = await Notifications.getPermissionsAsync();
+
+    if (status !== "granted") {
+      const { status: newStatus } =
+        await Notifications.requestPermissionsAsync();
+
+      if (newStatus !== "granted") {
+        await Linking.openSettings();
+        return;
+      }
+    }
+
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     updatePeriod(value, id);
 

@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -66,9 +67,9 @@ export default function Onboarding({ onFinish }: PropsOnboarding) {
     });
   }, [step]);
   return (
-    <SafeAreaView style={globalStyles.safe}>
+    <SafeAreaView style={[globalStyles.safe, { flex: 1 }]}>
       <KeyboardAvoidingView
-        style={globalStyles.container}
+        style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <View style={styles.header}>
@@ -77,94 +78,97 @@ export default function Onboarding({ onFinish }: PropsOnboarding) {
           </View>
         </View>
 
-        <View style={styles.content}>
-          {step === 1 ? (
-            <>
-              <Text style={globalStyles.title}>Como podemos te chamar?</Text>
-
-              <Text style={globalStyles.subtitle}>
-                Queremos deixar sua experiência mais personalizada.
-              </Text>
-
-              <View style={globalStyles.inputContainer}>
-                <TextInput
-                  value={name}
-                  onChangeText={setName}
-                  placeholder="Digite seu nome..."
-                  placeholderTextColor={colors.placeholder}
-                  style={globalStyles.input}
-                  maxLength={20}
-                />
-              </View>
-            </>
-          ) : (
-            <>
-              <Text style={globalStyles.title}>Antes de terminarmos...</Text>
-
-              <Text style={globalStyles.subtitle}>
-                Para que possamos oferecer uma experiência personalizada,
-                informe-nos em quais períodos você costuma realizar suas
-                compras.
-              </Text>
-
-              <View style={styles.optionsContainer}>
-                {NotificationsDate.map((item) => {
-                  const selected = period === item.id;
-
-                  return (
-                    <Pressable
-                      key={item.id}
-                      onPress={() => setPeriod(item.id as ShoppingPeriod)}
-                      style={[
-                        styles.optionButton,
-                        {
-                          borderColor: selected
-                            ? colors.primary
-                            : colors.border,
-
-                          backgroundColor: selected
-                            ? `${colors.primary}15`
-                            : colors.card,
-                        },
-                      ]}
-                    >
-                      <Text
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{ paddingBottom: 20 }}
+          showsVerticalScrollIndicator={false}
+          bounces={false}
+          overScrollMode="never"
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.content}>
+            {step === 1 ? (
+              <>
+                <Text style={globalStyles.title}>Como podemos te chamar?</Text>
+                <Text style={globalStyles.subtitle}>
+                  Queremos deixar sua experiência mais personalizada.
+                </Text>
+                <View style={globalStyles.inputContainer}>
+                  <TextInput
+                    value={name}
+                    onChangeText={setName}
+                    placeholder="Digite seu nome..."
+                    placeholderTextColor={colors.placeholder}
+                    style={globalStyles.input}
+                    maxLength={20}
+                  />
+                </View>
+              </>
+            ) : (
+              <>
+                <Text style={globalStyles.title}>Antes de terminarmos...</Text>
+                <Text style={globalStyles.subtitle}>
+                  Para que possamos oferecer uma experiência personalizada,
+                  informe-nos em quais períodos você costuma realizar suas
+                  compras.
+                </Text>
+                <View style={styles.optionsContainer}>
+                  {NotificationsDate.map((item) => {
+                    const selected = period === item.id;
+                    return (
+                      <Pressable
+                        key={item.id}
+                        onPress={() => setPeriod(item.id as ShoppingPeriod)}
                         style={[
-                          styles.optionText,
+                          styles.optionButton,
                           {
-                            color: selected ? colors.primary : colors.text,
+                            borderColor: selected
+                              ? colors.primary
+                              : colors.border,
+                            backgroundColor: selected
+                              ? `${colors.primary}15`
+                              : colors.card,
                           },
                         ]}
                       >
-                        {item.label}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </>
-          )}
-        </View>
+                        <Text
+                          style={[
+                            styles.optionText,
+                            { color: selected ? colors.primary : colors.text },
+                          ]}
+                        >
+                          {item.label}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </>
+            )}
+          </View>
+        </ScrollView>
 
-        <Pressable
-          onPress={handleContinue}
-          disabled={(step === 1 && !name.trim()) || (step === 2 && !period)}
-          style={({ pressed }) => [
-            globalStyles.saveButton,
-            {
-              opacity:
-                pressed ||
-                (step === 1 && !name.trim()) ||
-                (step === 2 && !period)
-                  ? 0.7
-                  : 1,
-            },
-          ]}
-        >
-          <Text style={globalStyles.saveText}>
-            {step === 1 ? "Continuar" : "Finalizar"}
-          </Text>
-        </Pressable>
+        <View style={styles.footer}>
+          <Pressable
+            onPress={handleContinue}
+            disabled={(step === 1 && !name.trim()) || (step === 2 && !period)}
+            style={({ pressed }) => [
+              globalStyles.saveButton,
+              {
+                opacity:
+                  pressed ||
+                  (step === 1 && !name.trim()) ||
+                  (step === 2 && !period)
+                    ? 0.7
+                    : 1,
+              },
+            ]}
+          >
+            <Text style={globalStyles.saveText}>
+              {step === 1 ? "Continuar" : "Finalizar"}
+            </Text>
+          </Pressable>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -174,6 +178,7 @@ function createStyles(colors: any) {
   return StyleSheet.create({
     header: {
       marginBottom: 50,
+      paddingHorizontal: 20,
     },
 
     progressContainer: {
@@ -192,7 +197,10 @@ function createStyles(colors: any) {
 
     content: {
       flex: 1,
-      justifyContent: "center",
+      justifyContent: "flex-start",
+      paddingTop: 40,
+      paddingBottom: 20,
+      paddingHorizontal: 20,
     },
 
     optionsContainer: {
@@ -210,6 +218,11 @@ function createStyles(colors: any) {
     optionText: {
       fontSize: 15,
       fontWeight: "600",
+    },
+    footer: {
+      paddingBottom: 20,
+      paddingTop: 10,
+      paddingHorizontal: 20,
     },
   });
 }

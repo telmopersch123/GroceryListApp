@@ -9,7 +9,12 @@
       "distribution": "internal"
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_EMAILJS_SERVICE_ID": "service_hovabxf",
+        "EXPO_PUBLIC_EMAILJS_TEMPLATE_ID": "template_q2j7drh",
+        "EXPO_PUBLIC_EMAILJS_PUBLIC_KEY": "-rIeldoHV0LWWtyuy"
+      }
     },
     "production": {
       "autoIncrement": true
