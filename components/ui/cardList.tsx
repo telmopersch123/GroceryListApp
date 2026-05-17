@@ -1,18 +1,18 @@
 import { useSettings } from "@/app/context/SettingsContext";
-import {
-  createList,
-  deleteList,
-  LIMITE_LISTAS,
-} from "@/app/database/listsRepository";
 import { TypeListRenderHome } from "@/app/types/typesGlobal";
 import { FavoritedList } from "@/app/utils/functionFavorited";
 import { SwipeableRef } from "@/app/utils/functionsSwipe";
 import { useGlobalStyles } from "@/constants/globalStyles";
+import {
+  createList,
+  deleteList,
+  LIMITE_LISTAS,
+} from "@/database/listsRepository";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { useIsFocused } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { Copy, Star } from "lucide-react-native";
+import { Copy, Share2, Star } from "lucide-react-native";
 import { memo, RefObject, useEffect, useRef } from "react";
 import { Pressable, Text, View } from "react-native";
 import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
@@ -30,6 +30,7 @@ import Animated, {
 import Svg, { Circle } from "react-native-svg";
 import { RightAction } from "./RightAction";
 import { toastError, toastSuccess } from "./Toast";
+import { ShareList } from "./shareList";
 
 interface PropsCardList {
   lista: TypeListRenderHome;
@@ -184,7 +185,6 @@ function CardList({
                 paddingVertical: 4,
               }}
             >
-              {/* Anel com % no centro */}
               <View style={{ width: 56, height: 56 }}>
                 <Svg
                   width={56}
@@ -293,6 +293,21 @@ function CardList({
                         );
                       }}
                     </Pressable>
+
+                    <Pressable
+                      style={({ pressed }) => [
+                        globalStyles.iconButton,
+                        pressed && { transform: [{ scale: 0.9 }] },
+                      ]}
+                      onPress={() => ShareList(lista)}
+                    >
+                      {({ pressed }) => (
+                        <Share2
+                          size={18}
+                          color={pressed ? colors.primary : colors.iconColor}
+                        />
+                      )}
+                    </Pressable>
                   </View>
                 </View>
 
@@ -360,6 +375,20 @@ function CardList({
                         />
                       );
                     }}
+                  </Pressable>
+                  <Pressable
+                    style={({ pressed }) => [
+                      globalStyles.iconButton,
+                      pressed && { transform: [{ scale: 0.9 }] },
+                    ]}
+                    onPress={() => ShareList(lista)}
+                  >
+                    {({ pressed }) => (
+                      <Share2
+                        size={18}
+                        color={pressed ? colors.primary : colors.iconColor}
+                      />
+                    )}
                   </Pressable>
                 </View>
               </View>

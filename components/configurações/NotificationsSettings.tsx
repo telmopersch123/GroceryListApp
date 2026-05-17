@@ -1,12 +1,12 @@
 import { useSettings } from "@/app/context/SettingsContext";
+import { showToast } from "@/app/hooks/useToast";
+import { NotificationsDate } from "@/app/json/notificationsjson";
+import { scheduleNotifications } from "@/app/utils/notifications";
 import {
   getUserPreferences,
   updatePeriod,
   UserPreferences,
-} from "@/app/database/userPreferencesRepository";
-import { showToast } from "@/app/hooks/useToast";
-import { NotificationsDate } from "@/app/json/notificationsjson";
-import { scheduleNotifications } from "@/app/utils/notifications";
+} from "@/database/userPreferencesRepository";
 import { BellRing, Check, ChevronDown } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
 import {

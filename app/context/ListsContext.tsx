@@ -5,7 +5,7 @@ import {
   useContext,
   useState,
 } from "react";
-import { getLists } from "../database/listsRepository";
+import { getLists } from "../../database/listsRepository";
 import { TypeListRenderHome } from "../types/typesGlobal";
 
 type ListsContextType = {

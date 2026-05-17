@@ -3,6 +3,7 @@ import { showToast } from "@/app/hooks/useToast";
 import { CheckCircle, Info, XCircle } from "lucide-react-native";
 import React, { useEffect, useRef } from "react";
 import { Animated, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type ToastType = "success" | "error" | "info";
 
@@ -27,7 +28,7 @@ export function Toast({
 }: Props) {
   const { colors } = useSettings();
   const translateX = useRef(new Animated.Value(400)).current;
-
+  const insets = useSafeAreaInsets();
   const config = {
     success: {
       icon: <CheckCircle size={22} color={colors.primary} />,
@@ -69,7 +70,7 @@ export function Toast({
       style={{
         transform: [{ translateX }],
         position: "absolute",
-        bottom: 32,
+        bottom: 32 + insets.bottom + 60,
         right: 16,
         backgroundColor: colors.card,
         borderRadius: 12,

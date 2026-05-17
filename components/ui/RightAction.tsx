@@ -1,5 +1,5 @@
 import { Trash2 } from "lucide-react-native";
-import { Pressable, Text } from "react-native";
+import { Pressable } from "react-native";
 
 import Animated, {
   SharedValue,
@@ -44,9 +44,6 @@ export function RightAction({
         }}
       >
         <Trash2 size={20} color="#fff" />
-        <Text style={{ color: "#fff", fontSize: 12, fontWeight: "600" }}>
-          Remover
-        </Text>
       </Pressable>
     </Animated.View>
   );

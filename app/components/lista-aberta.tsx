@@ -2,12 +2,12 @@ import { useSettings } from "@/app/context/SettingsContext";
 import {
   getItemsByListId,
   toggleItem as toggleItemDb,
-} from "@/app/database/listItemsRepository";
+} from "../../database/listItemsRepository";
 import {
   getListById,
   LIMITE_LISTAS_POR_CATEGORIA,
   updateListCategory,
-} from "@/app/database/listsRepository";
+} from "../../database/listsRepository";
 
 import { ICONES } from "@/components/categorias/categoriaAccordion";
 import { TextComNegrito } from "@/components/ui/TextNegrito";
@@ -35,8 +35,8 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { getCategories } from "../../database/categoriesRepository";
 import { useLists } from "../context/ListsContext";
-import { getCategories } from "../database/categoriesRepository";
 import { useMarquee } from "../hooks/useMarquee";
 import { useToast } from "../hooks/useToast";
 import { Categoria, TypeItens } from "../types/typesGlobal";
@@ -60,7 +60,7 @@ export default function listasAberta() {
   const id = Number(params.id);
   const lista = listas.find((l) => l.id === id);
   const [itens, setItens] = useState<TypeItens[]>(() => getItemsByListId(id));
-  const [categorias, _] = useState<Categoria[]>(() => getCategories());
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState<
     number | null
   >(() => getListById(id)?.category_id ?? null);
@@ -76,6 +76,10 @@ export default function listasAberta() {
     inputRange: [0, 100],
     outputRange: ["0%", "100%"],
   });
+
+  useEffect(() => {
+    setCategorias(getCategories());
+  }, [modalCategorias]);
 
   useEffect(() => {
     Animated.timing(progressAnim, {
@@ -192,7 +196,9 @@ export default function listasAberta() {
           }
         >
           <Pencil size={16} color={colors.text} />
-          <Text style={styles.actionText}>Editar</Text>
+          <Text style={styles.actionText} numberOfLines={1}>
+            Editar
+          </Text>
         </Pressable>
 
         <Pressable
@@ -212,7 +218,7 @@ export default function listasAberta() {
             color={lista?.favorited ? "#FFD700" : colors.iconColor}
             fill={lista?.favorited ? "#FFD700" : "transparent"}
           />
-          <Text style={[styles.actionText]}>
+          <Text style={[styles.actionText]} numberOfLines={1}>
             {lista?.favorited ? "Desfavoritar" : "Favoritar"}
           </Text>
         </Pressable>
@@ -233,6 +239,7 @@ export default function listasAberta() {
               styles.actionText,
               categoriaSelecionada ? { color: colors.primary } : null,
             ]}
+            numberOfLines={1}
           >
             {categoriaAtual ? categoriaAtual.nome : "Categorizar"}
           </Text>
@@ -432,7 +439,12 @@ export default function listasAberta() {
                         setModalCategorias(false);
                       }}
                     >
-                      <Text style={styles.actionText}>Criar categoria</Text>
+                      <Text
+                        style={[styles.actionText, { color: "#fff" }]}
+                        numberOfLines={1}
+                      >
+                        Criar categoria
+                      </Text>
                     </Pressable>
                   </View>
                 </>
@@ -492,12 +504,14 @@ const makeStyles = (colors: any) =>
     },
     actions: {
       flexDirection: "row",
+      flexWrap: "wrap",
       gap: 10,
       marginVertical: 15,
     },
     actionText: {
       fontSize: 13,
       color: colors.text,
+      flexShrink: 1,
     },
     itemCard: {
       flexDirection: "row",

@@ -1,4 +1,4 @@
-import { Categoria } from "../types/typesGlobal";
+import { Categoria } from "../app/types/typesGlobal";
 import db from "./db";
 export const LIMITE_CATEGORIAS = 10;
 export function createCategory(nome: string, icon: number): Categoria {

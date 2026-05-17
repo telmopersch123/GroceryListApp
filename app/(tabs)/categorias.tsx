@@ -16,14 +16,14 @@ import {
 } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useLists } from "../context/ListsContext";
-import { useSettings } from "../context/SettingsContext";
 import {
   createCategory,
   deleteCategory,
   getCategories,
   LIMITE_CATEGORIAS,
-} from "../database/categoriesRepository";
+} from "../../database/categoriesRepository";
+import { useLists } from "../context/ListsContext";
+import { useSettings } from "../context/SettingsContext";
 import { Categoria } from "../types/typesGlobal";
 import { closeAllSwipes, SwipeableRef } from "../utils/functionsSwipe";
 
@@ -130,7 +130,7 @@ export default function Categorias() {
       }
     }, 0);
     return () => clearTimeout(time);
-  }, []);
+  }, [isFocused]);
 
   return (
     <View
@@ -186,6 +186,7 @@ export default function Categorias() {
               style={({ pressed }) => [
                 styles.button,
                 pressed && styles.buttonPressed,
+                { marginTop: 20 },
               ]}
               onPress={() => setModalVisivel(true)}
             >
@@ -196,7 +197,7 @@ export default function Categorias() {
         ) : (
           <FlatList
             data={categorias}
-            key={isFocused ? "focused" : "unfocused"}
+            // key={isFocused ? "focused" : "unfocused"}
             keyExtractor={(item) => item.id.toString()}
             contentContainerStyle={styles.listContainer}
             keyboardDismissMode="on-drag"
@@ -249,9 +250,11 @@ export default function Categorias() {
 const makeStyles = (colors: any) =>
   StyleSheet.create({
     header: {
-      flexDirection: "row",
+      flexDirection: "column",
       justifyContent: "space-between",
-      alignItems: "center",
+      alignItems: "flex-start",
+      flexWrap: "wrap",
+      gap: 8,
     },
 
     button: {
@@ -261,8 +264,11 @@ const makeStyles = (colors: any) =>
       borderRadius: 10,
       flexDirection: "row",
       alignItems: "center",
+      justifyContent: "center",
       gap: 8,
-      marginTop: 20,
+      alignSelf: "stretch",
+      flexBasis: "auto",
+      width: "100%",
     },
 
     buttonPressed: {

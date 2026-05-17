@@ -1,4 +1,4 @@
-import { TypeItens } from "../types/typesGlobal";
+import { TypeItens } from "../app/types/typesGlobal";
 import db from "./db";
 export const LIMITE_ITENS = 100;
 export function createItem(

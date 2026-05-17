@@ -1,4 +1,4 @@
-import { toggleFavorite } from "../database/listsRepository";
+import { toggleFavorite } from "../../database/listsRepository";
 import { TypeListRenderHome } from "../types/typesGlobal";
 
 export function FavoritedList(

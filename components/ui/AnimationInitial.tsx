@@ -1,7 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import LottieView from "lottie-react-native";
 import { View } from "react-native";
-
 import Animated, { FadeIn, ZoomIn } from "react-native-reanimated";
 
 import { useSettings } from "@/app/context/SettingsContext";

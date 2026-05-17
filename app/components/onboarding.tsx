@@ -1,5 +1,5 @@
 import { useSettings } from "@/app/context/SettingsContext";
-import { saveUserPreferences } from "@/app/database/userPreferencesRepository";
+import { saveUserPreferences } from "../../database/userPreferencesRepository";
 
 import { useGlobalStyles } from "@/constants/globalStyles";
 

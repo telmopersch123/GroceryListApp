@@ -1,5 +1,5 @@
-import { TypeItens, TypeListRenderHome } from "../types/typesGlobal";
-import { buildCopyName } from "../utils/functionCopyName";
+import { TypeItens, TypeListRenderHome } from "../app/types/typesGlobal";
+import { buildCopyName } from "../app/utils/functionCopyName";
 import db from "./db";
 import { createItem } from "./listItemsRepository";
 export const LIMITE_LISTAS = 50;

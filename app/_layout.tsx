@@ -1,12 +1,11 @@
 import { Toast } from "@/components/ui/Toast";
+import * as Notifications from "expo-notifications";
 import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Animated, { FadeIn, SlideInRight } from "react-native-reanimated";
 import { SettingsProvider, useSettings } from "./context/SettingsContext";
-
-import * as Notifications from "expo-notifications";
 import {
   cancelAllNotifications,
   scheduleNotifications,
@@ -14,23 +13,17 @@ import {
 
 import { AnimationInitial } from "@/components/ui/AnimationInitial";
 import { useEffect, useState } from "react";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { getUserPreferences } from "../database/userPreferencesRepository";
 import Onboarding from "./components/onboarding";
 import { ListsProvider } from "./context/ListsContext";
-import { getUserPreferences } from "./database/userPreferencesRepository";
 import { useToast } from "./hooks/useToast";
-
+SplashScreen.preventAutoHideAsync();
 function AppContent() {
   const { toast, hide } = useToast();
   const { colors, isDark } = useSettings();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [loading, setLoading] = useState(true);
-  // useEffect(() => {
-  //   async function reset() {
-  //     db.runSync(`DELETE FROM user_preferences`);
-  //     console.log("resetado");
-  //   }
-  //   reset();
-  // }, []);
 
   useEffect(() => {
     const sub = Notifications.addNotificationResponseReceivedListener(
@@ -42,6 +35,7 @@ function AppContent() {
     );
     return () => sub.remove();
   }, []);
+
   useEffect(() => {
     async function checkOnboarding() {
       try {
@@ -63,13 +57,17 @@ function AppContent() {
         console.error("Error checking onboarding status:", error);
       } finally {
         setLoading(false);
+        await SplashScreen.hideAsync();
       }
     }
     checkOnboarding();
   }, []);
 
   return (
-    <View style={{ flex: 1 }}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: colors.background }}
+      edges={["top"]}
+    >
       <StatusBar style={isDark ? "light" : "dark"} />
       {loading ? (
         <AnimationInitial />
@@ -105,18 +103,20 @@ function AppContent() {
           <Toast {...toast} onHide={hide} />
         </>
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ListsProvider>
-        <SettingsProvider>
-          <AppContent />
-        </SettingsProvider>
-      </ListsProvider>
+      <SafeAreaProvider>
+        <ListsProvider>
+          <SettingsProvider>
+            <AppContent />
+          </SettingsProvider>
+        </ListsProvider>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }

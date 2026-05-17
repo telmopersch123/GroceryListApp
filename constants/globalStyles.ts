@@ -75,6 +75,7 @@ export const useGlobalStyles = () => {
     actionButton: {
       flexDirection: "row",
       alignItems: "center",
+      justifyContent: "center",
       gap: 5,
       backgroundColor: colors.card,
       paddingVertical: 8,
@@ -82,6 +83,9 @@ export const useGlobalStyles = () => {
       borderRadius: 20,
       borderWidth: 1,
       borderColor: colors.border,
+      flex: 1,
+      minWidth: 100,
+      maxWidth: "100%",
     },
     actionButtonPressed: {
       backgroundColor: colors.inputBg,

@@ -6,10 +6,13 @@ import {
   Star,
 } from "lucide-react-native";
 import { Animated } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSettings } from "../context/SettingsContext";
 
 export default function TabLayout() {
-  const { colors, themeAnim } = useSettings();
+  const { colors, themeAnim, isDark } = useSettings();
+  const insets = useSafeAreaInsets();
+
   return (
     <Animated.View
       style={{
@@ -21,6 +24,7 @@ export default function TabLayout() {
       }}
     >
       <Tabs
+        key={isDark ? "dark" : "light"}
         screenOptions={{
           lazy: true,
           headerShown: false,
@@ -28,14 +32,24 @@ export default function TabLayout() {
           tabBarActiveBackgroundColor: colors.background,
           tabBarInactiveBackgroundColor: colors.background,
           tabBarInactiveTintColor: colors.subtext,
+          // tabBarStyle: {
+          //   height: 60,
+          //   position: "absolute",
+          //   left: 0,
+          //   right: 0,
+          //   bottom: 0,
+          //   backgroundColor: colors.background,
+          //   borderTopColor: colors.border,
+          // },
           tabBarStyle: {
-            height: 60,
+            height: 60 + insets.bottom,
             position: "absolute",
             left: 0,
             right: 0,
             bottom: 0,
             backgroundColor: colors.background,
             borderTopColor: colors.border,
+            paddingBottom: insets.bottom,
           },
           tabBarLabelStyle: {
             fontSize: 11,
@@ -46,7 +60,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: "Início",
+            // title: "Início",
             tabBarIcon: ({ color, focused }) => (
               <ShoppingBasket size={24} color={color} />
             ),
@@ -56,7 +70,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="favoritos"
           options={{
-            title: "Favoritos",
+            // title: "Favoritos",
             tabBarIcon: ({ color, focused }) => (
               <Star
                 size={24}
@@ -70,7 +84,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="categorias"
           options={{
-            title: "Categorias",
+            // title: "Categorias",
             tabBarIcon: ({ color, focused }) => (
               <LayoutGrid
                 size={24}
@@ -84,7 +98,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="configuracoes"
           options={{
-            title: "Configurações",
+            // title: "Configurações",
             tabBarIcon: ({ color, focused }) => (
               <Settings size={24} color={color} />
             ),

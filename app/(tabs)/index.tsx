@@ -114,7 +114,7 @@ export default function Home() {
         style={({ pressed }) => [
           globalStyles.floatingButton,
           {
-            bottom: insets.bottom + 45,
+            bottom: insets.bottom + 60 + 16,
           },
           pressed && globalStyles.floatingButtonPressed,
         ]}

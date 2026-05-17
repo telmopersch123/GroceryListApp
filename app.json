@@ -7,9 +7,8 @@
     "icon": "./assets/images/iconApp.png",
     "scheme": "grocerylist",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": false,
     "splash": {
-      "image": "./assets/images/splash-icon.png",
+      "image": "./assets/images/iconApp.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },

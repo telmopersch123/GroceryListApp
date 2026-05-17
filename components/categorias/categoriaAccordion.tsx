@@ -1,7 +1,7 @@
 import { useSettings } from "@/app/context/SettingsContext";
-import { getListsByCategory } from "@/app/database/listsRepository";
 import { Categoria, TypeListRenderHome } from "@/app/types/typesGlobal";
 import { closeAllSwipes, SwipeableRef } from "@/app/utils/functionsSwipe";
+import { getListsByCategory } from "@/database/listsRepository";
 import {
   Apple,
   Beef,
@@ -226,8 +226,8 @@ export function CategoriaAccordion({
                         outputRange: [0, contentHeight],
                       })
                     : isOpen
-                      ? undefined
-                      : 0,
+                    ? undefined
+                    : 0,
                 opacity: animationsEnabled ? animOpen : 1,
                 overflow: "hidden",
               }}

@@ -21,18 +21,21 @@ import Animated, {
   FadeOut,
   LinearTransition,
 } from "react-native-reanimated";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import {
   getItemsByListId,
   LIMITE_ITENS,
-} from "../database/listItemsRepository";
-import { getListById, updateList } from "../database/listsRepository";
+} from "../../database/listItemsRepository";
+import { getListById, updateList } from "../../database/listsRepository";
 import { TypeItens, TypeListRenderHome } from "../types/typesGlobal";
 
 export default function EditarLista() {
   const globalStyles = useGlobalStyles();
   const { colors, animationsEnabled } = useSettings();
-
+  const insets = useSafeAreaInsets();
   const [lista, setLista] = useState<TypeListRenderHome>();
 
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -217,7 +220,9 @@ export default function EditarLista() {
         ))}
       </ScrollView>
 
-      <View style={globalStyles.buttonContainer}>
+      <View
+        style={[globalStyles.buttonContainer, { bottom: insets.bottom + 20 }]}
+      >
         <Pressable style={globalStyles.saveButton} onPress={handleSalvar}>
           <FileEdit size={18} color="#fff" />
           <Text style={globalStyles.saveText}>Confirmar alterações</Text>

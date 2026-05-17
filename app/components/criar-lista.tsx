@@ -22,10 +22,10 @@ import Animated, {
 import { TextComNegrito } from "@/components/ui/TextNegrito";
 import { toastError, toastSuccess } from "@/components/ui/Toast";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { createItem, LIMITE_ITENS } from "../../database/listItemsRepository";
+import { createList, LIMITE_LISTAS } from "../../database/listsRepository";
 import { useLists } from "../context/ListsContext";
 import { useSettings } from "../context/SettingsContext";
-import { createItem, LIMITE_ITENS } from "../database/listItemsRepository";
-import { createList, LIMITE_LISTAS } from "../database/listsRepository";
 
 export default function CriarLista() {
   const { colors, animationsEnabled } = useSettings();
@@ -245,7 +245,9 @@ export default function CriarLista() {
       </ScrollView>
 
       {/* BOTÃO SALVAR */}
-      <View style={globalStyles.buttonContainer}>
+      <View
+        style={[globalStyles.buttonContainer, { bottom: insets.bottom + 20 }]}
+      >
         <Pressable style={globalStyles.saveButton} onPress={handleSalvar}>
           <Save size={18} color="#fff" />
           <Text style={globalStyles.saveText}>Criar</Text>
