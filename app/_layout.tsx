@@ -11,7 +11,6 @@ import {
   scheduleNotifications,
 } from "./utils/notifications";
 
-import { AnimationInitial } from "@/components/ui/AnimationInitial";
 import { useEffect, useState } from "react";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { getUserPreferences } from "../database/userPreferencesRepository";
@@ -69,9 +68,7 @@ function AppContent() {
       edges={["top"]}
     >
       <StatusBar style={isDark ? "light" : "dark"} />
-      {loading ? (
-        <AnimationInitial />
-      ) : showOnboarding ? (
+      {showOnboarding ? (
         <Animated.View entering={FadeIn.duration(250)} style={{ flex: 1 }}>
           <Animated.View
             entering={SlideInRight.springify()}

@@ -1,1 +1,0 @@
-export const AnimationInitial = () => null;

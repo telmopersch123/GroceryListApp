@@ -1,10 +1,18 @@
 import { NotificationsSettings } from "@/components/configurações/NotificationsSettings";
 import { ProgressStyleSelector } from "@/components/configurações/ProgressStyleSelector";
+import { ReportModal } from "@/components/suporte/ReportModal";
 import Colors from "@/constants/Colors";
 import { useGlobalStyles } from "@/constants/globalStyles";
-import { Bell, Moon, Sparkles } from "lucide-react-native";
-import React, { useMemo } from "react";
-import { ScrollView, StyleSheet, Switch, Text, View } from "react-native";
+import { Bell, Bug, Lightbulb, Moon, Sparkles } from "lucide-react-native";
+import React, { useMemo, useState } from "react";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSettings } from "../context/SettingsContext";
 type ColorScheme = typeof Colors.light;
@@ -20,7 +28,8 @@ export default function Configurações() {
     progressStyle,
     setProgressStyle,
   } = useSettings();
-
+  const [reportVisible, setReportVisible] = useState(false);
+  const [typeModal, setTypeModal] = useState<"bug" | "feature">("bug");
   const globalStyles = useGlobalStyles();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
@@ -32,7 +41,7 @@ export default function Configurações() {
       ]}
     >
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 20 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 80 }}
         showsVerticalScrollIndicator={false}
       >
         <View style={[globalStyles.container, styles.pagePadding]}>
@@ -131,6 +140,71 @@ export default function Configurações() {
               colors={colors}
             />
           </View>
+          <View>
+            <Text style={styles.sectionTitle}>Suporte</Text>
+
+            <Text style={styles.sectionSubtitle}>Feedback e ajuda</Text>
+
+            <View style={styles.card}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.row,
+                  pressed && {
+                    opacity: 0.7,
+                  },
+                ]}
+                onPress={() => {
+                  setTypeModal("bug");
+                  setReportVisible(true);
+                }}
+              >
+                <View style={styles.iconLabel}>
+                  <Bug size={22} color="#337539" />
+
+                  <View style={styles.textContainer}>
+                    <Text style={styles.label}>Reportar problema</Text>
+
+                    <Text style={styles.description}>
+                      Ajude a melhorar o aplicativo
+                    </Text>
+                  </View>
+                </View>
+              </Pressable>
+
+              <View style={styles.divider} />
+
+              <Pressable
+                style={({ pressed }) => [
+                  styles.row,
+                  pressed && {
+                    opacity: 0.7,
+                  },
+                ]}
+                onPress={() => {
+                  setTypeModal("feature");
+                  setReportVisible(true);
+                }}
+              >
+                <View style={styles.iconLabel}>
+                  <Lightbulb size={22} color="#337539" />
+
+                  <View style={styles.textContainer}>
+                    <Text style={styles.label}>Sugerir funcionalidade</Text>
+
+                    <Text style={styles.description}>
+                      Compartilhe uma ideia conosco
+                    </Text>
+                  </View>
+                </View>
+              </Pressable>
+            </View>
+
+            <ReportModal
+              visible={reportVisible}
+              onClose={() => setReportVisible(false)}
+              type={typeModal}
+            />
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -182,5 +256,18 @@ const makeStyles = (colors: ColorScheme) =>
       height: 1,
       backgroundColor: colors.border,
       marginLeft: 34,
+    },
+    sectionTitle: {
+      fontSize: 24,
+      fontWeight: "700",
+      color: colors.text,
+      marginTop: 34,
+    },
+
+    sectionSubtitle: {
+      fontSize: 14,
+      color: colors.subtext,
+      marginTop: 4,
+      marginBottom: -8,
     },
   });
