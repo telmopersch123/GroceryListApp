@@ -17,6 +17,7 @@
       "supportsTablet": true
     },
     "android": {
+      "allowBackup": false,
       "icon": "./assets/images/iconApp.png",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/iconApp.png",

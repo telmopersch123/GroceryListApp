@@ -140,42 +140,68 @@ export default function EditarLista() {
       </View>
 
       <View style={styles.formContainer}>
-        <Text style={globalStyles.label}>Nome da lista</Text>
+        <View style={{ marginBottom: 5 }}>
+          <Text style={globalStyles.label}>Nome da lista</Text>
 
-        <TextInput
-          placeholder="Ex: Compras do mês de Janeiro"
-          placeholderTextColor={colors.placeholder}
-          value={nomeLista}
-          maxLength={35}
-          onChangeText={(text) => {
-            setNomeLista(text);
-            if (text.trim()) setErroNome("");
-          }}
-          style={[globalStyles.input, erroNome && globalStyles.inputError]}
-        />
+          <TextInput
+            placeholder="Ex: Compras da semana..."
+            placeholderTextColor={colors.placeholder}
+            value={nomeLista}
+            maxLength={50}
+            onChangeText={(text) => {
+              setNomeLista(text);
+              if (text.trim()) setErroNome("");
+            }}
+            style={[globalStyles.input, erroNome && globalStyles.inputError]}
+          />
 
-        <Text style={globalStyles.error}>{erroNome || ""}</Text>
+          <Text style={globalStyles.error}>{erroNome || " "}</Text>
+        </View>
 
         <Text style={globalStyles.label}>Itens da sua lista</Text>
 
         <View style={globalStyles.row}>
-          <TextInput
-            placeholder="Adicionar item..."
-            placeholderTextColor={colors.placeholder}
-            value={itemInput}
-            maxLength={35}
-            onChangeText={(text) => {
-              setItemInput(text);
-              if (text.length >= 35)
-                return setErroItem("Limite de 35 caracteres");
-              if (text.trim()) setErroItem("");
-            }}
+          <View
             style={[
               globalStyles.input,
-              { flex: 1 },
+              {
+                flex: 1,
+                flexDirection: "row",
+                alignItems: "center",
+                paddingVertical: 0,
+              },
               erroItem && globalStyles.inputError,
             ]}
-          />
+          >
+            <TextInput
+              placeholder="Adicionar Item..."
+              placeholderTextColor={colors.placeholder}
+              value={itemInput}
+              maxLength={40}
+              onChangeText={(text) => {
+                setItemInput(text);
+                if (text.length >= 40)
+                  return setErroItem("Limite de 40 caracteres");
+                if (text.trim()) setErroItem("");
+              }}
+              style={[
+                globalStyles.input,
+                { flex: 1, borderWidth: 0, paddingHorizontal: 0 },
+              ]}
+            />
+
+            <Text
+              style={{
+                fontSize: 12,
+                fontWeight: "500",
+                color: ItensList.length >= LIMITE_ITENS ? "#BA7517" : "#9E9E9E",
+                paddingLeft: 8,
+                paddingRight: 12,
+              }}
+            >
+              {ItensList.length}/{LIMITE_ITENS}
+            </Text>
+          </View>
 
           <Pressable
             onPress={() => {
@@ -188,36 +214,41 @@ export default function EditarLista() {
           </Pressable>
         </View>
 
-        <Text style={globalStyles.error}>{erroItem || ""}</Text>
+        <Text style={globalStyles.error}>{erroItem || " "}</Text>
       </View>
 
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: 120 }}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
         showsVerticalScrollIndicator={false}
       >
-        {ItensList.map((item) => (
-          <Animated.View
-            key={item.id}
-            entering={animationsEnabled ? FadeIn.duration(120) : undefined}
-            exiting={animationsEnabled ? FadeOut.duration(120) : undefined}
-            layout={
-              animationsEnabled ? LinearTransition.duration(180) : undefined
-            }
-            style={globalStyles.itemCard}
-          >
-            <TextComNegrito
-              texto={item.name}
-              style={[globalStyles.itemText, { flexShrink: 1, marginRight: 8 }]}
-            />
+        <View style={globalStyles.listContainer}>
+          {ItensList.map((item) => (
+            <Animated.View
+              key={item.id}
+              entering={animationsEnabled ? FadeIn.duration(120) : undefined}
+              exiting={animationsEnabled ? FadeOut.duration(120) : undefined}
+              layout={
+                animationsEnabled ? LinearTransition.duration(180) : undefined
+              }
+              style={globalStyles.itemCard}
+            >
+              <TextComNegrito
+                texto={item.name}
+                style={[
+                  globalStyles.itemText,
+                  { flexShrink: 1, marginRight: 8 },
+                ]}
+              />
 
-            <TrashButton
-              onPress={() => handleRemover(item.id)}
-              color={colors.text}
-            />
-          </Animated.View>
-        ))}
+              <TrashButton
+                onPress={() => handleRemover(item.id)}
+                color={colors.text}
+              />
+            </Animated.View>
+          ))}
+        </View>
       </ScrollView>
 
       <View

@@ -141,7 +141,7 @@ export default function CriarLista() {
           <Text style={globalStyles.label}>Nome da lista</Text>
 
           <TextInput
-            placeholder="Ex: Compras do mês de Janeiro"
+            placeholder="Ex: Compras da semana..."
             placeholderTextColor="#9E9E9E"
             value={nomeLista}
             maxLength={50}
@@ -181,20 +181,25 @@ export default function CriarLista() {
                   return setErroItem("Limite de 40 caracteres");
                 if (text.trim()) setErroItem("");
               }}
-              style={[globalStyles.input, { flex: 1 }]}
+              style={[
+                globalStyles.input,
+                { flex: 1, borderWidth: 0, paddingHorizontal: 0 },
+              ]}
             />
 
             <Text
               style={{
                 fontSize: 12,
                 fontWeight: "500",
-                color: ItensList.length >= 8 ? "#BA7517" : "#9E9E9E",
+                color: ItensList.length >= LIMITE_ITENS ? "#BA7517" : "#9E9E9E",
                 paddingLeft: 8,
+                paddingRight: 12,
               }}
             >
-              0/{ItensList.length}
+              {ItensList.length}/{LIMITE_ITENS}
             </Text>
           </View>
+
           <Pressable
             onPress={() => {
               Keyboard.dismiss();
